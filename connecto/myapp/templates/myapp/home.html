@@ -1,0 +1,358 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connecto - Global Premium Social</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=12">
+    <link rel="stylesheet" href="{% static 'myapp/css/view_story.css' %}?v=1">
+    {% block extra_css %}{% endblock %}
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <a href="{% url 'home' %}" class="logo-text">Connecto</a>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode"
+                    style="border:none; cursor:pointer;">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'explore' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'explore' %}active{% endif %}">
+                    <span class="material-icons">explore</span>
+                    <span>Explore</span>
+                </a>
+                <a href="{% url 'reels' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'reels' %}active{% endif %}">
+                    <span class="material-icons">movie</span>
+                    <span>Reels</span>
+                </a>
+                <a href="{% url 'messages' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}">
+                    <span class="material-icons">chat_bubble_outline</span>
+                    <span>Messages</span>
+                </a>
+                <a href="{% url 'notifications' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <span class="material-icons">favorite_border</span>
+                    <span>Notifications</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="#"
+                        class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'create-post' or request.resolver_match.url_name == 'upload_reel' or request.resolver_match.url_name == 'create_story' %}active{% endif %}"
+                        onclick="toggleCreateDropdown(event)">
+                        <span class="material-icons">add_circle_outline</span>
+                        <span>Create</span>
+                        <span class="material-icons expand-icon" style="margin-left:auto;">expand_more</span>
+                    </a>
+                    <div class="dropdown-menu" id="createDropdown"
+                        style="display: none; padding-left: 3rem; flex-direction: column;">
+                        <a href="{% url 'create-post' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'create-post' %}active{% endif %}"
+                            style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">add_box</span>
+                            <span style="font-size: 0.9rem;">Create Post</span>
+                        </a>
+                        <a href="{% url 'upload_reel' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'upload_reel' %}active{% endif %}"
+                            style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">movie_creation</span>
+                            <span style="font-size: 0.9rem;">Upload Reel</span>
+                        </a>
+                        <a href="{% url 'create_story' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'create_story' %}active{% endif %}"
+                            style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">auto_stories</span>
+                            <span style="font-size: 0.9rem;">Create Story</span>
+                        </a>
+                    </div>
+                </div>
+                <a href="{% url 'profile' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <span class="material-icons">person_outline</span>
+                    <span>Profile</span>
+                </a>
+                <a href="{% url 'settings' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <span class="material-icons">settings</span>
+                    <span>Settings</span>
+                </a>
+
+                <div style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{% url 'logout' %}" class="nav-link" style="color: #f43f5e;">
+                        <span class="material-icons">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            {% block content %}
+            <div class="feed-section">
+                <!-- Stories Section -->
+                <div class="stories-container">
+
+                    <!-- Your Story -->
+                    {% if my_story_index != -1 %}
+                    <a href="{% url 'view_story' %}?index={{ my_story_index }}" class="story-card" style="text-decoration:none;">
+                        <div class="story-avatar">
+                            <div class="story-avatar-inner">
+                                <img src="{{uid.profile_pic.url}}" alt="Me">
+                            </div>
+                        </div>
+                        <span class="story-name">Your Story</span>
+                    </a>
+                    {% else %}
+                    <!-- Your Story → goes to create story page -->
+                    <a href="{% url 'create_story' %}" class="story-card add-story" style="text-decoration:none;">
+                        <div class="story-avatar" style="position:relative;">
+                            <div class="story-avatar-inner">
+                                <img src="{{uid.profile_pic.url}}" alt="Me">
+                            </div>
+                            <!-- Plus badge -->
+                            <span style="
+                                position:absolute; bottom:-2px; right:-2px;
+                                width:22px; height:22px; border-radius:50%;
+                                background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+                                display:flex; align-items:center; justify-content:center;
+                                border:2px solid var(--bg-card);
+                            ">
+                                <span class="material-icons"
+                                    style="font-size:0.85rem; color:#fff !important;">add</span>
+                            </span>
+                        </div>
+                        <span class="story-name">Your Story</span>
+                    </a>
+                    {% endif %}
+
+                    <!-- Dynamic stories from DB -->
+                    {% for item in unique_stories %}
+                        {% if item.story.user != uid %}
+                        <a href="{% url 'view_story' %}?index={{ item.index }}" class="story-card"
+                            title="{{ item.story.user.username }}" style="text-decoration:none;">
+                            <div class="story-avatar">
+                                <div class="story-avatar-inner">
+                                    <img src="{{ item.story.user.profile_pic.url }}" alt="{{ item.story.user.username }}">
+                                </div>
+                            </div>
+                            <span class="story-name">{{ item.story.user.username }}</span>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+
+                </div>
+
+                <!-- Feed Posts -->
+                <div class="posts-wrapper">
+                    {% for i in post_all %}
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <a href="{% url 'profile' %}">
+                                    <img src="{{i.user.profile_pic.url}}" class="post-user-img" alt="Profile">
+                                </a>
+                                <a href="{% url 'profile' %}" class="post-user-name" style="text-decoration:none;">
+                                    {{i.user.username}}
+                                </a>
+                            </div>
+                            <div class="action-btn">
+                                <span class="material-icons">more_horiz</span>
+                            </div>
+                        </div>
+
+                        <div class="post-image-container">
+                            <img src="{{i.image.url}}" alt="Post">
+                        </div>
+
+                        <div class="post-actions">
+                            <div class="action-buttons">
+                                <div class="action-left" style="display:flex; gap:0.8rem;">
+                                    <a href="{% url 'like_unlike' pk=i.id %}" class="action-btn"
+                                        style="text-decoration:none;">
+                                        {% if i.id in liked_posts %}
+                                        <span class="material-icons" style="color: #c50a29;">favorite</span>
+                                        {% else %}
+                                        <span class="material-icons"
+                                            style="color: var(--text-primary);">favorite_border</span>
+                                        {% endif %}
+                                    </a>
+
+                                    <a href="javascript:void(0)" class="action-btn" style="text-decoration:none;" onclick="toggleCommentForm('{{ i.id }}')">
+                                        <span class="material-icons">chat_bubble_outline</span>
+                                    </a>
+                                    <a href="#" class="action-btn" style="text-decoration:none;">
+                                        <span class="material-icons">send</span>
+                                    </a>
+                                </div>
+                                <div class="action-btn">
+                                    <span class="material-icons">bookmark_border</span>
+                                </div>
+                            </div>
+
+                            <div class="post-info">
+                                <div class="likes-count">{{i.liked_post.count}} Likes • {{ i.comments.count }} Comments</div>
+                                <div class="caption-text">
+                                    <span style="font-weight:700; color:var(--text-primary);">{{i.user.username}}</span>
+                                    <span>{{i.caption}}</span>
+                                </div>
+                                <!-- Togglable Comments Section -->
+                                <div id="comment-section-{{ i.id }}" style="display: none; margin-top: 0.8rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                                    <!-- Comments List -->
+                                    <div class="comments-list" style="max-height: 150px; overflow-y: auto; margin-bottom: 0.8rem;">
+                                        {% for comment in i.comments.all|dictsortreversed:"created_at" %}
+                                        <div class="comment-item" style="font-size: 0.85rem; margin-bottom: 0.4rem;">
+                                            <span style="font-weight: 700;">{{ comment.user.username }}</span> {{ comment.comment_text }}
+                                        </div>
+                                        {% empty %}
+                                        <p style="font-size: 0.8rem; color: var(--text-muted);">No comments yet.</p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Add Comment Form -->
+                                    <form action="{% url 'add_comment' pk=i.id %}" method="POST" style="display: flex; align-items: center; gap: 0.5rem;">
+                                        {% csrf_token %}
+                                        <input type="text" name="comment_text" placeholder="Add a comment..." required style="flex: 1; background: none; border: none; border-bottom: 1px solid var(--border-color); padding: 0.4rem 0; font-size: 0.85rem; color: var(--text-primary); outline: none;">
+                                        <button type="submit" style="background: none; border: none; color: var(--accent-primary); cursor: pointer; display: flex; align-items: center;"><span class="material-icons" style="font-size: 1.2rem;">send</span></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 5rem; opacity: 0.3;">
+                        <span class="material-icons" style="font-size: 5rem;">photo_camera</span>
+                        <p style="margin-top: 1rem;">No posts yet. Start following someone!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right Sidebar Widgets -->
+            <div class="widgets-section">
+                <!-- User Profile Summary -->
+                <div class="user-mini-card">
+                    <div class="user-mini-info">
+                        <img src="{{uid.profile_pic.url}}" class="mini-avatar-widget" alt="Avatar">
+                        <div>
+                            <a href="{% url 'profile' %}" class="handle"
+                                style="text-decoration:none;">{{uid.username}}</a><br>
+                            <a href="{% url 'profile' %}" class="name"
+                                style="text-decoration:none;">{{uid.name|default:uid.username}}</a>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}" class="switch-btn" style="text-decoration:none;">Switch</a>
+                </div>
+
+                <!-- Suggestions Heading -->
+                <div class="suggestions-header">
+                    <span>Suggestions For You</span>
+                    <a href="{% url 'explore' %}" class="see-all-btn" style="text-decoration:none;">See All</a>
+                </div>
+
+                <!-- Suggestions List -->
+                <div class="suggestions-list">
+                    {% for _ in "12345"|make_list %}
+                    <div class="suggestion-item">
+                        <div class="suggestion-user">
+                            <img src="https://i.pravatar.cc/150?u=s{{forloop.counter}}" alt="avatar">
+                            <div>
+                                <div class="handle">luxury_soul_{{forloop.counter}}</div>
+                                <div class="meta">Suggested for you</div>
+                            </div>
+                        </div>
+                        <a href="#" class="follow-btn" style="text-decoration:none;">Follow</a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Footer Links -->
+                <div class="widget-footer">
+                    <div class="footer-links">
+                        <a href="#">About</a> • <a href="#">Help</a> • <a href="#">Press</a> • <a href="#">API</a> • <a
+                            href="#">Jobs</a> • <a href="#">Privacy</a> • <a href="#">Terms</a>
+                    </div>
+                    <div class="copyright">© 2026 Connecto Premium Systems</div>
+                </div>
+            </div>
+            {% endblock %}
+
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Story expand helper -->
+    <script>
+        function toggleCreateDropdown(event) {
+            event.preventDefault();
+            const dropdownMenu = document.getElementById('createDropdown');
+            const expandIcon = event.currentTarget.querySelector('.expand-icon');
+            if (dropdownMenu.style.display === 'none') {
+                dropdownMenu.style.display = 'flex';
+                expandIcon.textContent = 'expand_less';
+            } else {
+                dropdownMenu.style.display = 'none';
+                expandIcon.textContent = 'expand_more';
+            }
+        }
+    </script>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('.material-icons');
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+        function toggleCommentForm(postId) {
+            const section = document.getElementById(`comment-section-${postId}`);
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                section.querySelector('input').focus();
+            } else {
+                section.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Followers • Connecto</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=11">
+    <link rel="stylesheet" href="{% static 'myapp/css/following.css' %}?v=11">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <a href="{% url 'home' %}" class="logo-text">Connecto</a>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'explore' %}" class="nav-link {% if request.resolver_match.url_name == 'explore' %}active{% endif %}">
+                    <span class="material-icons">explore</span>
+                    <span>Explore</span>
+                </a>
+                <a href="{% url 'reels' %}" class="nav-link {% if request.resolver_match.url_name == 'reels' %}active{% endif %}">
+                    <span class="material-icons">movie</span>
+                    <span>Reels</span>
+                </a>
+                <a href="{% url 'messages' %}" class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}">
+                    <span class="material-icons">chat_bubble_outline</span>
+                    <span>Messages</span>
+                </a>
+                <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <span class="material-icons">favorite_border</span>
+                    <span>Notifications</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'create-post' or request.resolver_match.url_name == 'upload_reel' or request.resolver_match.url_name == 'create_story' %}active{% endif %}" onclick="toggleCreateDropdown(event)">
+                        <span class="material-icons">add_circle_outline</span>
+                        <span>Create</span>
+                        <span class="material-icons expand-icon" style="margin-left:auto;">expand_more</span>
+                    </a>
+                    <div class="dropdown-menu" id="createDropdown" style="display: none; padding-left: 3rem; flex-direction: column;">
+                        <a href="{% url 'create-post' %}" class="nav-link {% if request.resolver_match.url_name == 'create-post' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">add_box</span>
+                            <span style="font-size: 0.9rem;">Create Post</span>
+                        </a>
+                        <a href="{% url 'upload_reel' %}" class="nav-link {% if request.resolver_match.url_name == 'upload_reel' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">movie_creation</span>
+                            <span style="font-size: 0.9rem;">Upload Reel</span>
+                        </a>
+                        <a href="{% url 'create_story' %}" class="nav-link {% if request.resolver_match.url_name == 'create_story' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">auto_stories</span>
+                            <span style="font-size: 0.9rem;">Create Story</span>
+                        </a>
+                    </div>
+                </div>
+                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <span class="material-icons">person_outline</span>
+                    <span>Profile</span>
+                </a>
+                <a href="{% url 'settings' %}" class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <span class="material-icons">settings</span>
+                    <span>Settings</span>
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{% url 'logout' %}" class="nav-link logout-link">
+                        <span class="material-icons">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="following-container animate-fade-in">
+                <div class="following-header">
+                    <div class="header-top">
+                        <a href="{% url 'profile' %}" class="back-btn">
+                            <span class="material-icons">arrow_back</span>
+                        </a>
+                        <h1 class="page-title">Followers</h1>
+                    </div>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-bar">
+                        <span class="material-icons">search</span>
+                        <input type="text" id="userSearch" placeholder="Search followers...">
+                    </div>
+                </div>
+
+                <div class="user-list" id="userList">
+                    {% for follow in follow_list %}
+                    <div class="user-card" data-username="{{ follow.following.username }}" data-name="{{ follow.following.name|default:'' }}">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {% if follow.following.profile_pic %}
+                                <img src="{{ follow.following.profile_pic.url }}" alt="{{ follow.following.username }}">
+                                {% else %}
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #ccc;"></div>
+                                {% endif %}
+                            </div>
+                            <div class="user-details">
+                                <span class="username">{{ follow.following.username }}</span>
+                                <span class="full-name">{{ follow.following.name|default:'' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="user-actions">
+                            {% if follow.following.id in my_following %}
+                                <a href="{% url 'follow_unfollow' pk=follow.following.id %}" class="btn-pill btn-secondary">Remove</a>
+                            {% else %}
+                                <a href="{% url 'follow_unfollow' pk=follow.following.id %}" class="btn-pill btn-primary">Follow Back</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                        <div style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">
+                            No followers yet.
+                        </div>
+                    {% endfor %}
+
+                    <!-- Dummy Data for Preview -->
+                    <!-- <div class="user-card" data-username="alex_dev" data-name="Alex Frontend">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <img src="https://ui-avatars.com/api/?name=Alex+Frontend&background=0D8ABC&color=fff" alt="alex_dev">
+                            </div>
+                            <div class="user-details">
+                                <span class="username">alex_dev</span>
+                                <span class="full-name">Alex Frontend</span>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn-pill btn-secondary">Remove</button>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card" data-username="sarah.designs" data-name="Sarah UI/UX">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <img src="https://ui-avatars.com/api/?name=Sarah+Designs&background=C4A265&color=fff" alt="sarah.designs">
+                            </div>
+                            <div class="user-details">
+                                <span class="username">sarah.designs</span>
+                                <span class="full-name">Sarah UI/UX</span>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn-pill btn-primary">Follow Back</button>
+                        </div>
+                    </div>
+
+                    {% if not followers_list and not dummy_needed %}
+                    {% endif %} -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('.material-icons');
+
+        // Theme initialization
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+
+        // Search filtering function
+        const userSearch = document.getElementById('userSearch');
+        const userList = document.getElementById('userList');
+        const userCards = userList.querySelectorAll('.user-card');
+
+        userSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            userCards.forEach(card => {
+                const username = card.dataset.username.toLowerCase();
+                const name = card.dataset.name.toLowerCase();
+                if (username.includes(query) || name.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

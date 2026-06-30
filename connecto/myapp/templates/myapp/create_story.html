@@ -1,0 +1,397 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/create_story.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="create-story-wrapper">
+    <form method="POST" action="{% url 'create_story' %}" enctype="multipart/form-data" class="create-story-card" id="createStoryForm">
+        {% csrf_token %}
+
+        <!-- ====== LEFT: Upload / Preview ====== -->
+        <div class="create-story-left">
+
+            <!-- Upload Placeholder -->
+            <div class="story-upload-placeholder" id="storyDropZone">
+                <div class="upload-icon-story">
+                    <span class="material-icons">auto_stories</span>
+                </div>
+
+                <h3>Create Your Story</h3>
+                <p>Share a moment — image or video — that disappears in 24&nbsp;hours</p>
+
+                <!-- Type selector -->
+                <div class="story-type-pills">
+                    <button type="button" class="type-pill active" id="pillImage" onclick="switchType('image')">
+                        <span class="material-icons">image</span> Photo
+                    </button>
+                    <button type="button" class="type-pill" id="pillVideo" onclick="switchType('video')">
+                        <span class="material-icons">videocam</span> Video
+                    </button>
+                </div>
+
+                <!-- File inputs (hidden) -->
+                <input type="file" id="storyImageInput" name="image"
+                       accept="image/*" hidden onchange="handleMediaSelect(event, 'image')">
+                <input type="file" id="storyVideoInput" name="video"
+                       accept="video/*" hidden onchange="handleMediaSelect(event, 'video')">
+
+                <label class="story-upload-btn" id="uploadLabel" for="storyImageInput">
+                    <span class="material-icons">upload</span> Upload Story
+                </label>
+
+                <div class="story-illustrate">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <!-- Preview Area -->
+            <div class="story-preview-container hidden" id="storyPreviewContainer">
+                <!-- Progress strip (decorative preview) -->
+                <div class="story-progress-strip">
+                    <div class="story-progress-bar"><div class="story-progress-fill" id="previewFill"></div></div>
+                    <div class="story-progress-bar"></div>
+                    <div class="story-progress-bar"></div>
+                </div>
+
+                <!-- Media -->
+                <img src="" alt="Story Preview" id="storyImagePreview"
+                     class="story-viewer-media" style="display:none;">
+                <video id="storyVideoPreview" class="story-viewer-media"
+                       autoplay loop muted playsinline style="display:none;"></video>
+
+                <!-- Overlays -->
+                <div class="story-viewer-top-grad"></div>
+                <div class="story-viewer-bot-grad"></div>
+
+                <!-- Remove button -->
+                <button type="button" class="story-remove-btn" onclick="resetStoryUpload()">
+                    <span class="material-icons">close</span>
+                </button>
+
+                <span class="story-frame-label">
+                    <span class="material-icons" style="font-size:0.8rem; vertical-align:middle;">auto_stories</span>
+                    Story Preview
+                </span>
+            </div>
+        </div>
+
+        <!-- ====== RIGHT: Story Details ====== -->
+        <div class="create-story-right">
+
+            <!-- Header -->
+            <div class="story-detail-header">
+                <div class="story-user-info">
+                    <img src="{{ uid.profile_pic.url }}" alt="Avatar" class="story-mini-avatar">
+                    <span class="story-user-name">{{ uid.username }}</span>
+                </div>
+                <button type="submit" class="story-share-btn">
+                    <span class="material-icons">send</span> Share Story
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="story-detail-body">
+
+                <!-- Caption -->
+                <div>
+                    <label class="story-section-label">Caption</label>
+                    <textarea name="caption" id="storyCaption"
+                              class="story-caption-textarea"
+                              placeholder="Add a caption to your story…"
+                              maxlength="220"></textarea>
+                    <div style="text-align:right; font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+                        <span id="captionCount">0</span>/220
+                    </div>
+                </div>
+
+                <!-- Duration -->
+                <div>
+                    <label class="story-section-label">Display Duration</label>
+                    <div class="story-duration-row" onclick="cycleDuration()">
+                        <div class="story-duration-left">
+                            <span class="material-icons">timer</span>
+                            <span id="durationLabel">15 seconds</span>
+                        </div>
+                        <span class="material-icons chevron">expand_more</span>
+                    </div>
+                    <input type="hidden" name="duration" id="durationInput" value="15">
+                </div>
+
+                <!-- ====== Music Section ====== -->
+                <div>
+                    <label class="story-section-label">Add Music</label>
+
+                    <!-- Hidden file input -->
+                    <input type="file" id="storyMusicInput" name="music"
+                           accept="audio/*" hidden onchange="handleMusicSelect(event)">
+
+                    <!-- Music picker (shown when no song selected) -->
+                    <div class="story-music-picker" id="musicPicker" onclick="document.getElementById('storyMusicInput').click()">
+                        <div class="music-picker-icon">
+                            <span class="material-icons">library_music</span>
+                        </div>
+                        <div class="music-picker-text">
+                            <strong>Choose a Song</strong>
+                            <span>Add background music to your story</span>
+                        </div>
+                        <span class="material-icons music-picker-arrow">chevron_right</span>
+                    </div>
+
+                    <!-- Music preview (shown after song selected) -->
+                    <div class="story-music-preview hidden" id="musicPreview">
+                        <div class="music-preview-top">
+                            <div class="music-disc-wrap">
+                                <div class="music-disc" id="musicDisc">
+                                    <span class="material-icons">music_note</span>
+                                </div>
+                            </div>
+                            <div class="music-info">
+                                <span class="music-file-name" id="musicFileName">No file selected</span>
+                                <span class="music-file-size" id="musicFileSize">—</span>
+                            </div>
+                            <button type="button" class="music-remove-btn" onclick="removeMusic()" title="Remove music">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </div>
+
+                        <!-- Waveform visualizer -->
+                        <div class="music-wave-row">
+                            <button type="button" class="music-play-btn" id="musicPlayBtn" onclick="toggleMusicPlayback()">
+                                <span class="material-icons" id="musicPlayIcon">play_arrow</span>
+                            </button>
+                            <div class="music-waveform" id="musicWaveform">
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                                <div class="wave-bar"></div><div class="wave-bar"></div>
+                            </div>
+                            <span class="music-duration" id="musicDuration">0:00</span>
+                        </div>
+
+                        <!-- Hidden audio element -->
+                        <audio id="musicAudioPlayer" preload="metadata"></audio>
+                    </div>
+
+                    <p class="music-hint">
+                        <span class="material-icons" style="font-size:0.82rem; vertical-align:middle;">info</span>
+                        Works with both photo &amp; video stories
+                    </p>
+                </div>
+
+                <!-- Audience -->
+                <div>
+                    <label class="story-section-label">Audience</label>
+                    <div class="story-audience-selector">
+                        <label class="audience-option">
+                            <input type="radio" name="audience" value="everyone" checked>
+                            <span class="material-icons">public</span>
+                            <div class="audience-option-text">
+                                <strong>Everyone</strong>
+                                <span>Visible to all your followers</span>
+                            </div>
+                        </label>
+                        <label class="audience-option">
+                            <input type="radio" name="audience" value="close_friends">
+                            <span class="material-icons">favorite</span>
+                            <div class="audience-option-text">
+                                <strong>Close Friends</strong>
+                                <span>Only your close friends list</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                
+            </div><!-- /story-detail-body -->
+
+        </div><!-- /create-story-right -->
+
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* ---- Type Switcher ---- */
+    let currentType = 'image';
+    const durations = [5, 10, 15, 30, 60];
+    let durIdx = 2;        // default 15s
+
+    function switchType(type) {
+        currentType = type;
+        document.getElementById('pillImage').classList.toggle('active', type === 'image');
+        document.getElementById('pillVideo').classList.toggle('active', type === 'video');
+
+        const lbl   = document.getElementById('uploadLabel');
+        const iInp  = document.getElementById('storyImageInput');
+        const vInp  = document.getElementById('storyVideoInput');
+
+        if (type === 'image') {
+            lbl.setAttribute('for', 'storyImageInput');
+            lbl.innerHTML = '<span class="material-icons">upload</span> Choose Photo';
+            iInp.style.display = '';
+        } else {
+            lbl.setAttribute('for', 'storyVideoInput');
+            lbl.innerHTML = '<span class="material-icons">upload</span> Choose Video';
+            vInp.style.display = '';
+        }
+
+        // Reset if media already selected
+        resetStoryUpload();
+    }
+
+    /* ---- Media Select Handler ---- */
+    function handleMediaSelect(e, type) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const url  = URL.createObjectURL(file);
+        const img  = document.getElementById('storyImagePreview');
+        const vid  = document.getElementById('storyVideoPreview');
+
+        img.style.display = 'none';
+        vid.style.display = 'none';
+
+        if (type === 'image') {
+            img.src = url;
+            img.style.display = 'block';
+        } else {
+            vid.src = url;
+            vid.style.display = 'block';
+        }
+
+        document.getElementById('storyDropZone').classList.add('hidden');
+        document.getElementById('storyPreviewContainer').classList.remove('hidden');
+
+        // Animate progress fill for demo feel
+        animatePreviewBar();
+    }
+
+    /* ---- Reset ---- */
+    function resetStoryUpload() {
+        document.getElementById('storyImageInput').value = '';
+        document.getElementById('storyVideoInput').value = '';
+        document.getElementById('storyImagePreview').src = '';
+        document.getElementById('storyVideoPreview').src = '';
+        document.getElementById('storyPreviewContainer').classList.add('hidden');
+        document.getElementById('storyDropZone').classList.remove('hidden');
+        clearTimeout(window._storyFillTimer);
+        document.getElementById('previewFill').style.width = '0%';
+    }
+
+    /* ---- Fake progress bar animation ---- */
+    function animatePreviewBar() {
+        const fill = document.getElementById('previewFill');
+        let w = 0;
+        clearInterval(window._storyFillTimer);
+        window._storyFillTimer = setInterval(() => {
+            w += 0.6;
+            if (w >= 100) { w = 0; } // loop
+            fill.style.width = w + '%';
+        }, 80);
+    }
+
+    /* ---- Duration Cycler ---- */
+    function cycleDuration() {
+        durIdx = (durIdx + 1) % durations.length;
+        const val = durations[durIdx];
+        document.getElementById('durationLabel').textContent =
+            val < 60 ? val + ' seconds' : '1 minute';
+        document.getElementById('durationInput').value = val;
+    }
+
+    /* ---- Caption counter ---- */
+    document.getElementById('storyCaption').addEventListener('input', function() {
+        document.getElementById('captionCount').textContent = this.value.length;
+    });
+
+    /* ===================================
+       MUSIC — Select / Preview / Playback
+       =================================== */
+    let musicPlaying = false;
+
+    function handleMusicSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        const audio = document.getElementById('musicAudioPlayer');
+        audio.src = url;
+
+        // Show file info
+        document.getElementById('musicFileName').textContent = file.name;
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        document.getElementById('musicFileSize').textContent = sizeMB + ' MB';
+
+        // Get duration when metadata loads
+        audio.addEventListener('loadedmetadata', function handler() {
+            const mins = Math.floor(audio.duration / 60);
+            const secs = Math.floor(audio.duration % 60);
+            document.getElementById('musicDuration').textContent =
+                mins + ':' + secs.toString().padStart(2, '0');
+            audio.removeEventListener('loadedmetadata', handler);
+        });
+
+        // Toggle visibility
+        document.getElementById('musicPicker').classList.add('hidden');
+        document.getElementById('musicPreview').classList.remove('hidden');
+    }
+
+    function toggleMusicPlayback() {
+        const audio = document.getElementById('musicAudioPlayer');
+        const icon  = document.getElementById('musicPlayIcon');
+        const disc  = document.getElementById('musicDisc');
+        const waveform = document.getElementById('musicWaveform');
+
+        if (musicPlaying) {
+            audio.pause();
+            icon.textContent = 'play_arrow';
+            disc.classList.remove('spinning');
+            waveform.classList.remove('active');
+        } else {
+            audio.play();
+            icon.textContent = 'pause';
+            disc.classList.add('spinning');
+            waveform.classList.add('active');
+        }
+        musicPlaying = !musicPlaying;
+
+        // Reset when audio ends
+        audio.onended = function() {
+            musicPlaying = false;
+            icon.textContent = 'play_arrow';
+            disc.classList.remove('spinning');
+            waveform.classList.remove('active');
+        };
+    }
+
+    function removeMusic() {
+        const audio = document.getElementById('musicAudioPlayer');
+        audio.pause();
+        audio.src = '';
+        musicPlaying = false;
+
+        document.getElementById('storyMusicInput').value = '';
+        document.getElementById('musicPlayIcon').textContent = 'play_arrow';
+        document.getElementById('musicDisc').classList.remove('spinning');
+        document.getElementById('musicWaveform').classList.remove('active');
+        document.getElementById('musicFileName').textContent = 'No file selected';
+        document.getElementById('musicFileSize').textContent = '—';
+        document.getElementById('musicDuration').textContent = '0:00';
+
+        document.getElementById('musicPreview').classList.add('hidden');
+        document.getElementById('musicPicker').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

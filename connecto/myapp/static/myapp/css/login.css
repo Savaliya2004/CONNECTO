@@ -1,0 +1,166 @@
+/* ========================================
+   LOGIN — Warm Earth Aesthetic (FIXED)
+   Cozy • Premium • Calm Luxury
+======================================== */
+
+body {
+    background: linear-gradient(145deg, #F2EDE4 0%, #E8E0D4 50%, #FAF6F0 100%) !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.login-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E8E0D4 !important;
+    border-radius: 28px !important;
+    padding: 3.5rem 3rem !important;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 40px rgba(44, 36, 24, 0.08) !important;
+    text-align: center;
+    animation: floatIn 0.8s ease forwards;
+}
+
+@keyframes floatIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-logo {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: 2.4rem !important;
+    font-weight: 700 !important;
+    color: #2D4A2E !important;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: #2D4A2E !important;
+}
+
+.login-logo::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 3px;
+    background: #C4A265;
+    border-radius: 2px;
+    margin: 8px auto 0;
+}
+
+.login-subtitle {
+    color: #8A7E70 !important;
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+}
+
+/* Error Message */
+.login-error,
+.login-card .text-red-500 {
+    background: #FDF2F2 !important;
+    color: #B91C1C !important;
+    padding: 0.8rem 1.2rem !important;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #FDE8E8 !important;
+}
+
+.login-form {
+    text-align: left !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.login-form-group {
+    margin-bottom: 0 !important;
+}
+
+.login-label {
+    display: block;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #B8A898 !important;
+    margin-bottom: 0.6rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+}
+
+.login-input {
+    width: 100% !important;
+    padding: 1rem 1.2rem !important;
+    border: 1.5px solid #E8E0D4 !important;
+    border-radius: 14px !important;
+    font-size: 0.95rem !important;
+    font-family: 'DM Sans', sans-serif !important;
+    color: #1E1E1E !important;
+    background: #FAF6F0 !important;
+    transition: all 0.3s ease !important;
+    outline: none !important;
+}
+
+.login-input:focus {
+    border-color: #3C5A3E !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 4px rgba(60, 90, 62, 0.08) !important;
+}
+
+.login-input::placeholder {
+    color: #B0A696 !important;
+    opacity: 0.6;
+}
+
+.login-btn-submit {
+    width: 100% !important;
+    padding: 1rem !important;
+    background: #2D4A2E !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 14px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    font-family: 'DM Sans', sans-serif !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    margin-top: 1rem !important;
+    box-shadow: 0 4px 12px rgba(45, 74, 46, 0.15) !important;
+}
+
+.login-btn-submit:hover {
+    background: #3C5A3E !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(45, 74, 46, 0.25) !important;
+}
+
+.login-footer {
+    margin-top: 2.5rem !important;
+    font-size: 0.9rem !important;
+    color: #8A7E70 !important;
+}
+
+.login-link {
+    color: #2D4A2E !important;
+    font-weight: 700 !important;
+    text-decoration: none;
+    margin-left: 0.3rem;
+}
+
+.login-link:hover {
+    color: #C4A265 !important;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 2.5rem 1.8rem !important;
+        border-radius: 24px !important;
+    }
+}

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Instagram Ultra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../css/home.css">
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <!-- Left Sidebar Navigation -->
+    <aside class="w-64 bg-white sidebar flex flex-col justify-between hidden md:flex flex-shrink-0">
+        <div class="p-6">
+            <div class="mb-10 flex items-center gap-2 cursor-pointer transition transform hover:scale-105">
+                <img src="../assets/images/logo.png" alt="Logo" class="h-8 w-8 object-contain">
+                <h1 class="text-2xl font-bold font-sans tracking-tight">Instagram</h1>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="{% url 'home' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg bg-gray-100 font-semibold text-gray-900 transition"><span
+                        class="material-icons">home</span> Home</a>
+                <a href="{% url 'explore' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">explore</span> Explore</a>
+                <a href="{% url 'messages' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">chat</span> Messages</a>
+                <a href="{% url 'notifications' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">favorite_border</span> Notifications</a>
+                <a href="{% url 'create_post' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">add_box</span> Create Post</a>
+                <a href="{% url 'create_story' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">history_edu</span> Create Story</a>
+                <a href="{% url 'followers' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">people</span> Followers</a>
+                <a href="{% url 'following' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">person_add</span> Following</a>
+                <a href="{% url 'profile' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><img
+                        src="../assets/images/avatar1.jpg" class="w-6 h-6 rounded-full border border-gray-300">
+                    Profile</a>
+                <a href="{% url 'edit_profile' %}"
+                    class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">settings</span> Edit Profile</a>
+                <a href="#"
+                    class="dark-mode-toggle flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                        class="material-icons">dark_mode</span> Dark Mode</a>
+                <a href="#"
+                    class="logout-btn flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-red-500 transition"><span
+                        class="material-icons">logout</span> Logout</a>
+            </nav>
+        </div>
+
+        <div class="p-6">
+            <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><span
+                    class="material-icons">menu</span> More</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto">
+
+        <!-- Top Navbar (Mobile only, but prompt says NO mobile bottom navbar, so we keep top nav for search etc.) -->
+        <header
+            class="bg-white border-b border-gray-200 sticky top-0 z-40 glassmorphism px-4 py-3 flex justify-between items-center md:hidden">
+            <div class="flex items-center gap-2">
+                <img src="../assets/images/logo.png" alt="Logo" class="h-6">
+                <span class="font-bold text-lg text-gradient">Instagram</span>
+            </div>
+            <div class="flex gap-4 text-gray-700">
+                <span class="material-icons cursor-pointer">favorite_border</span>
+                <span class="material-icons cursor-pointer">chat</span>
+            </div>
+        </header>
+
+        <div class="max-w-4xl mx-auto flex gap-8 pt-8 px-4 relative">
+
+            <!-- Feed Section -->
+            <div class="flex-1 max-w-xl pb-20">
+
+                <!-- Stories Slider -->
+                <div class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 shadow-sm flex gap-4 overflow-x-auto">
+                    <!-- Your Story -->
+                    <div class="flex flex-col items-center gap-1 cursor-pointer hover-scale flex-shrink-0 relative">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center relative border border-gray-300">
+                            <img src="../assets/images/avatar1.jpg" class="w-full h-full rounded-full object-cover">
+                            <div
+                                class="absolute bottom-0 right-0 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center border-2 border-white text-white">
+                                <span class="material-icons text-xs">add</span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-gray-500">Your story</span>
+                    </div>
+
+                    <!-- Other Stories -->
+                    <a href="story-viewer.html"
+                        class="flex flex-col items-center gap-1 cursor-pointer hover-scale flex-shrink-0">
+                        <div class="story-ring">
+                            <img src="../assets/images/avatar2.jpg" class="w-14 h-14 rounded-full object-cover">
+                        </div>
+                        <span class="text-xs text-gray-800 font-medium">alex_dev</span>
+                    </a>
+                    <a href="story-viewer.html"
+                        class="flex flex-col items-center gap-1 cursor-pointer hover-scale flex-shrink-0">
+                        <div class="story-ring">
+                            <img src="../assets/images/avatar3.jpg" class="w-14 h-14 rounded-full object-cover">
+                        </div>
+                        <span class="text-xs text-gray-800 font-medium">sarah.designs</span>
+                    </a>
+                </div>
+
+                <!-- Posts List -->
+                <div class="space-y-6">
+                    <!-- Post 1 -->
+                    <article class="post-card">
+                        <!-- Post Header -->
+                        <div class="flex items-center justify-between p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="story-ring">
+                                    <img src="../assets/images/avatar2.jpg" alt="User"
+                                        class="w-8 h-8 rounded-full object-cover">
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-sm">alex_dev</h3>
+                                    <p class="text-xs text-gray-500">Tokyo, Japan</p>
+                                </div>
+                            </div>
+                            <div class="post-menu">
+                                <span class="material-icons menu-btn">more_horiz</span>
+
+                                <div class="menu-dropdown">
+                                    <button class="edit-btn">Edit</button>
+                                    <button class="delete-btn">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post Image -->
+                        <div class="relative bg-gray-100">
+                            <img src="../assets/images/post1.jpg" alt="Post content"
+                                class="w-full h-auto object-cover max-h-[600px]">
+                        </div>
+
+                        <!-- Post Actions -->
+                        <div class="p-4 pb-2">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex gap-4">
+                                    <button class="like-btn text-gray-800 hover:text-gray-500 transition"><span
+                                            class="material-icons text-2xl">favorite_border</span></button>
+                                    <button class="text-gray-800 hover:text-gray-500 transition"><span
+                                            class="material-icons text-2xl">chat_bubble_outline</span></button>
+                                    <button class="text-gray-800 hover:text-gray-500 transition"><span
+                                            class="material-icons text-2xl">send</span></button>
+                                </div>
+                                <button class="text-gray-800 hover:text-gray-500 transition"><span
+                                        class="material-icons text-2xl">bookmark_border</span></button>
+                            </div>
+
+                            <p class="font-semibold text-sm mb-1">1,234 likes</p>
+
+                            <p class="text-sm text-gray-800 mb-2">
+                                <span class="font-semibold mr-1">alex_dev</span> Exploring the bright lights of the
+                                city. Loving the vibe! ✨🌆
+                                <span class="text-blue-500 ml-1">#tokyo #travel #photography</span>
+                            </p>
+
+                            <!-- Comments Section -->
+                            <div class="comments-section">
+                                <button class="expand-comments text-sm text-gray-500 mb-2 focus:outline-none">View all
+                                    12 comments</button>
+                                <div class="comments-list hidden text-sm space-y-1 mb-3">
+                                    <div><span class="font-semibold mr-2">jane_doe</span>Amazing shot! 😍</div>
+                                    <div><span class="font-semibold mr-2">mike.smith</span>Wish I was there.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Comment -->
+                        <div class="px-4 py-3 border-t border-gray-100">
+                            <form class="comment-form flex items-center justify-between">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <span class="material-icons text-gray-400">sentiment_satisfied_alt</span>
+                                    <input type="text" placeholder="Add a comment..."
+                                        class="w-full outline-none text-sm bg-transparent border-none focus:ring-0 placeholder-gray-400"
+                                        autocomplete="off">
+                                </div>
+                                <button type="submit"
+                                    class="text-blue-500 font-semibold text-sm opacity-80 hover:opacity-100">Post</button>
+                            </form>
+                        </div>
+                    </article>
+
+                    <!-- Post 2 -->
+                    <article class="post-card">
+                        <!-- Post Header -->
+                        <div class="flex items-center justify-between p-4">
+                            <div class="flex items-center gap-3">
+                                <img src="../assets/images/avatar3.jpg" alt="User"
+                                    class="w-9 h-9 rounded-full object-cover border border-gray-200">
+                                <div>
+                                    <h3 class="font-semibold text-sm">sarah.designs</h3>
+                                    <p class="text-xs text-gray-500">Design Studio</p>
+                                </div>
+                            </div>
+                            <span class="material-icons text-gray-500 cursor-pointer">more_horiz</span>
+                        </div>
+
+                        <!-- Post Image -->
+                        <div class="relative bg-gray-100">
+                            <img src="../assets/images/post2.jpg" alt="Post content"
+                                class="w-full h-auto object-cover max-h-[600px]">
+                        </div>
+
+                        <!-- Post Actions -->
+                        <div class="p-4 pb-2">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex gap-4">
+                                    <button class="like-btn text-gray-800 hover:text-gray-500 transition"><span
+                                            class="material-icons text-2xl">favorite_border</span></button>
+                                    <button class="text-gray-800 hover:text-gray-500 transition"
+                                        data-modal-target="post-view-modal"><span
+                                            class="material-icons text-2xl">chat_bubble_outline</span></button>
+                                    <button class="text-gray-800 hover:text-gray-500 transition"><span
+                                            class="material-icons text-2xl">send</span></button>
+                                </div>
+                                <button class="text-gray-800 hover:text-gray-500 transition"><span
+                                        class="material-icons text-2xl">bookmark_border</span></button>
+                            </div>
+
+                            <p class="font-semibold text-sm mb-1">8,901 likes</p>
+
+                            <p class="text-sm text-gray-800 mb-2">
+                                <span class="font-semibold mr-1">sarah.designs</span> New workspace setup. Clean and
+                                minimal setup boosts productivity. 💻🌿
+                            </p>
+
+                            <!-- Comments Section -->
+                            <div class="comments-section">
+                                <button class="expand-comments text-sm text-gray-500 mb-2 focus:outline-none">View all
+                                    89 comments</button>
+                                <div class="comments-list hidden text-sm space-y-1 mb-3">
+                                    <div><span class="font-semibold mr-2">dev_guy</span>Love the aesthetic!</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Comment -->
+                        <div class="px-4 py-3 border-t border-gray-100">
+                            <form class="comment-form flex items-center justify-between">
+                                <div class="flex items-center gap-2 flex-1">
+                                    <span class="material-icons text-gray-400">sentiment_satisfied_alt</span>
+                                    <input type="text" placeholder="Add a comment..."
+                                        class="w-full outline-none text-sm bg-transparent border-none focus:ring-0 placeholder-gray-400"
+                                        autocomplete="off">
+                                </div>
+                                <button type="submit"
+                                    class="text-blue-500 font-semibold text-sm opacity-80 hover:opacity-100">Post</button>
+                            </form>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+
+            <!-- Right Sidebar (Suggestions) -->
+            <div class="w-80 hidden lg:block pr-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4 cursor-pointer">
+                        <img src="../assets/images/avatar1.jpg" class="w-14 h-14 rounded-full border border-gray-200">
+                        <div>
+                            <h2 class="font-semibold text-sm text-gray-900">current_user</h2>
+                            <p class="text-sm text-gray-500">John Doe</p>
+                        </div>
+                    </div>
+                    <button class="text-blue-500 text-xs font-semibold hover:text-gray-800 transition">Switch</button>
+                </div>
+
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-gray-500 font-semibold text-sm">Suggested for you</h3>
+                    <button class="text-gray-900 text-xs font-semibold hover:text-gray-500 transition">See All</button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Suggestion Item -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 cursor-pointer">
+                            <img src="../assets/images/avatar2.jpg" class="w-8 h-8 rounded-full border border-gray-200">
+                            <div>
+                                <h4 class="font-semibold text-xs text-gray-900 leading-tight">new_friend1</h4>
+                                <p class="text-xs text-gray-500">Followed by alex_dev</p>
+                            </div>
+                        </div>
+                        <button
+                            class="text-blue-500 text-xs font-semibold hover:text-blue-700 transition">Follow</button>
+                    </div>
+                    <!-- Suggestion Item -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 cursor-pointer">
+                            <img src="../assets/images/avatar3.jpg" class="w-8 h-8 rounded-full border border-gray-200">
+                            <div>
+                                <h4 class="font-semibold text-xs text-gray-900 leading-tight">art_lover</h4>
+                                <p class="text-xs text-gray-500">New to Instagram</p>
+                            </div>
+                        </div>
+                        <button
+                            class="text-blue-500 text-xs font-semibold hover:text-blue-700 transition">Follow</button>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <p class="text-xs text-gray-400 leading-snug">About • Help • Press • API • Jobs • Privacy • Terms •
+                        Locations • Language • Meta Verified</p>
+                    <p class="text-xs text-gray-400 mt-4">© 2026 INSTAGRAM ULTRA</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <button id="darkModeToggle" class="dark-toggle-btn">🌙</button>
+
+    <script src="../js/script.js"></script>
+</body>
+
+</html>

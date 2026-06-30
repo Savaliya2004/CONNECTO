@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Connecto</title>
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'myapp/css/register.css' %}?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="register-body">
+    <div class="register-card">
+        <h1 class="logo-text register-logo">Connecto</h1>
+        <p class="subtitle register-subtitle">Join the elite community.</p>
+
+        {% if e_msg %}
+            <div class="register-error">{{ e_msg }}</div>
+        {% endif %}
+
+        <form method="post" action="{% url 'signup' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="register-form-grid">
+                <div class="register-form-full">
+                    <label class="register-label">Username</label>
+                    <input type="text" name="username" placeholder="luxury_soul" required class="register-input">
+                </div>
+                <div class="register-form-full">
+                    <label class="register-label">Email Address</label>
+                    <input type="email" name="email" placeholder="email@example.com" required class="register-input">
+                </div>
+                <div>
+                    <label class="register-label">Password</label>
+                    <input type="password" name="password" placeholder="••••••••" required class="register-input">
+                </div>
+                <div>
+                    <label class="register-label">Confirm</label>
+                    <input type="password" name="confirm_password" placeholder="••••••••" required class="register-input">
+                </div>
+                <div class="register-form-full">
+                    <label class="register-label">Gender</label>
+                    <div class="register-gender-container">
+                         <input type="radio" name="gender" value="male" id="male" checked> Male
+                         <input type="radio" name="gender" value="female" id="female"> Female
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-pill btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+
+        <p class="register-footer">
+            Already a member? <a href="{% url 'login' %}" class="register-link">Sign In</a>
+        </p>
+    </div>
+</body>
+</html>

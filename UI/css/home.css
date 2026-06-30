@@ -1,0 +1,255 @@
+/* ===============================
+   CHILLR THEME OVERRIDE
+================================ */
+
+/* BODY */
+body {
+    background: #0b1120 !important;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+/* GLASS EFFECT */
+.bg-white,
+.sidebar,
+header,
+.post-card,
+.card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* REMOVE WHITE FEEL */
+.border,
+.border-gray-200,
+.border-gray-100 {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* TEXT COLORS FIX */
+.text-gray-900,
+.text-gray-800 {
+    color: #fff !important;
+}
+
+.text-gray-700,
+.text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+/* SIDEBAR LINKS */
+.sidebar a {
+    color: #94a3b8 !important;
+}
+
+.sidebar a:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #22d3ee !important;
+}
+
+.sidebar .bg-gray-100 {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+/* LOGO TEXT */
+h1,
+.text-gradient {
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* STORIES */
+.story-ring {
+    padding: 2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+}
+
+.story-ring img {
+    border: 2px solid #0b1120;
+}
+
+/* POSTS */
+.post-card {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* BUTTONS */
+button,
+.like-btn {
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* ICON COLORS */
+.material-icons {
+    color: #94a3b8;
+}
+
+button:hover .material-icons {
+    color: #22d3ee;
+}
+
+/* COMMENT INPUT */
+input {
+    color: #fff !important;
+}
+
+input::placeholder {
+    color: #64748b;
+}
+
+/* RIGHT SIDEBAR */
+.w-80 {
+    color: #fff;
+}
+
+/* FOLLOW BUTTON */
+.text-blue-500 {
+    color: #22d3ee !important;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+    color: #f87171 !important;
+}
+
+/* DARK TOGGLE BUTTON */
+.dark-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+    border: none;
+    padding: 12px 14px;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(34, 211, 238, 0.3);
+}
+
+
+/* SIDEBAR SCROLL */
+.sidebar {
+    overflow-y: auto;
+    height: 100vh;
+    padding-right: 6px;
+}
+
+/* HIDE SCROLLBAR */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+
+
+/* SIDEBAR HOVER */
+.sidebar a {
+    transition: all 0.25s ease;
+}
+
+.sidebar a:hover {
+    transform: translateX(6px);
+    background: rgba(255,255,255,0.06) !important;
+    box-shadow: 0 4px 20px rgba(34,211,238,0.1);
+}
+
+/* CARD HOVER */
+.post-card {
+    transition: 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* STORY HOVER */
+.story-ring {
+    transition: 0.25s;
+}
+
+.story-ring:hover {
+    transform: scale(1.08);
+}
+
+/* BUTTON PRESS EFFECT */
+button:active {
+    transform: scale(0.95);
+}
+
+/* HEART POP ANIMATION */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+.liked {
+    color: #f43f5e !important;
+    animation: pop 0.3s ease;
+}
+
+
+/* POST MENU */
+.post-menu {
+    position: relative;
+}
+
+/* DROPDOWN */
+.menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 30px;
+    width: 120px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10;
+}
+
+/* BUTTONS */
+.menu-dropdown button {
+    padding: 10px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.menu-dropdown button:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+/* DELETE COLOR */
+.delete-btn {
+    color: #f87171;
+}
+
+/* SHOW */
+.menu-dropdown.show {
+    display: flex;
+}

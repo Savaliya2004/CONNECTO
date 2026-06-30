@@ -1,0 +1,150 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .notifications-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    }
+    .notif-item {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: 0.3s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-avatar {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .notif-text {
+        flex:1;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--text-body);
+    }
+    .notif-text strong {
+        font-weight: 700;
+        color: var(--text-primary);
+        color: var(--accent-primary);
+    }
+    .notif-time {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: block;
+        margin-top: 4px;
+    }
+    .notif-image-preview {
+        width: 44px; height: 44px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    .notif-follow-btn {
+        padding: 0.5rem 1.2rem !important;
+        font-size: 0.8rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feed-section" style="max-width: 800px;">
+    <h2 class="page-title" style="margin-bottom: 2rem; font-family: 'Playfair Display', serif;">Notifications</h2>
+    
+    <div class="notifications-card animate-fade-in">
+        <div class="notif-list">
+            <!-- Example: Like -->
+            {% if all_noti %}
+            
+            {% for notifications in all_noti %}
+                {% if notifications.notification_type == "follow" %}
+                    <div class="notif-item">
+                        <img src="{{notifications.sender.profile_pic.url}}" class="notif-avatar">
+                        <div class="notif-text">
+                            <strong>{{notifications.sender.username}}</strong> {{notifications.message}}
+                            <span class="notif-time">{{notifications.whenpublished}}</span>
+                        </div>
+                        {% if notifications.sender.id not in my_following %}
+                        <a href="{% url 'follow_unfollow' pk=notifications.sender.id %}"
+                        class = "follow-btn bg-blue-500 hover:bg-blue-600 text-white font-semibond py-1.5 px-4
+                        rounded-lg text-sm transition flex-shrink-0 w-32">FOLLOW BACK </a>
+                        {% endif %}
+            
+                    </div>
+                {% endif %}
+
+                {% if notifications.notification_type == "like" %}
+                    <div class="notif-item">
+                        <img src="{{notifications.sender.profile_pic.url}}" class="notif-avatar">
+                        <div class="notif-text">
+                            <strong>{{notifications.sender.username}}</strong> {{notifications.message}}
+                            <span class="notif-time">{{notifications.whenpublished}}</span>
+                        </div>
+                        {% if notifications.post_fk %}
+                        <img src="{{notifications.post_fk.image.url}}" class="notif-image-preview">
+                        {% elif notifications.reel_fk %}
+                        <video src="{{notifications.reel_fk.video.url}}" class="notif-image-preview" muted></video>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if notifications.notification_type == "comment" %}
+                    <div class="notif-item">
+                        <img src="{{notifications.sender.profile_pic.url}}" class="notif-avatar">
+                        <div class="notif-text">
+                            <strong>{{notifications.sender.username}}</strong> {{notifications.message}}
+                            <span class="notif-time">{{notifications.whenpublished}}</span>
+                        </div>
+                        {% if notifications.post_fk %}
+                        <img src="{{notifications.post_fk.image.url}}" class="notif-image-preview">
+                        {% elif notifications.reel_fk %}
+                        <video src="{{notifications.reel_fk.video.url}}" class="notif-image-preview" muted></video>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+            {% else %}
+                <h3 class = "font-bold text-gray-900 text-sm mb-4"> NO , New Notifications !!</h3>
+            {% endif %}
+
+            <!--   Example: Follow -->
+            <!-- <div class="notif-item">
+                <img src="https://i.pravatar.cc/150?u=n2" class="notif-avatar">
+                <div class="notif-text">
+                    <strong>creator_vibes</strong> started following you.
+                    <span class="notif-time">5h</span>
+                </div>
+                <button class="btn-pill btn-primary notif-follow-btn">Follow</button>
+            </div>
+
+                    Example: Comment -->
+            <!-- <div class="notif-item">
+                <img src="https://i.pravatar.cc/150?u=n3" class="notif-avatar">
+                <div class="notif-text">
+                    <strong>aura_curator</strong> commented: "This is stunning! 🔥"
+                    <span class="notif-time">1d</span>
+                </div>
+                <img src="https://picsum.photos/200/201" class="notif-image-preview">
+            </div>
+            
+            {% for _ in "123456"|make_list %}
+            <div class="notif-item">
+                <img src="https://i.pravatar.cc/150?u=nx{{forloop.counter}}" class="notif-avatar">
+                <div class="notif-text">
+                    <strong>member_active_{{forloop.counter}}</strong> liked your photo.
+                    <span class="notif-time">{{forloop.counter}}d</span>
+                </div>
+                <img src="https://picsum.photos/200/2{{forloop.counter}}" class="notif-image-preview">
+            </div>
+            {% endfor %} --> 
+        </div>
+    </div>
+</div>
+{% endblock %}

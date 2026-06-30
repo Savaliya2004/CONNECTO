@@ -1,0 +1,329 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/reels.css' %}?v=5">
+{% endblock %}
+
+{% block content %}
+<div class="reels-container">
+    <div class="reels-wrapper snap-y snap-mandatory">
+        {% for reel in all_reel %}
+        <div class="reel-item snap-always snap-center">
+            
+            <video class="reel-video" src="{{ reel.video.url }}" loop playsinline></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-info">
+                    <div class="reel-user">
+                        {% if reel.user.profile_pic %}
+                        <img src="{{ reel.user.profile_pic.url }}" alt="Profile" class="reel-avatar">
+                        {% else %}
+                        <img src="https://i.pravatar.cc/150?u={{ reel.user.id }}" alt="Profile" class="reel-avatar">
+                        {% endif %}
+                        <span class="reel-username">{{ reel.user.username }}</span>
+                        <button class="reel-follow-btn">Follow</button>
+                    </div>
+                    <div class="reel-caption">
+                        <p>{{ reel.caption }}</p>
+                    </div>
+                    {% if reel.location %}
+                    <div class="reel-location">
+                        <span class="material-icons" style="font-size: 14px;">place</span> {{ reel.location }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Togglable Reel Comment Section -->
+                    <div id="reel-comment-section-{{ reel.id }}" style="display: none; flex-direction: column; margin-top: 10px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 10px; backdrop-filter: blur(8px);">
+                        <!-- Comments List -->
+                        <div class="reel-comments-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 10px; font-size: 0.8rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                            {% for comment in reel.reel_comments.all|dictsortreversed:"created_at" %}
+                            <div style="margin-bottom: 5px;"><strong>{{ comment.user.username }}</strong> {{ comment.comment_text }}</div>
+                            {% empty %}
+                            <div style="opacity: 0.7;">No comments yet.</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Add Reel Comment Form -->
+                        <form action="{% url 'add_reel_comment' pk=reel.id %}" method="POST" style="display: flex; gap: 5px;">
+                            {% csrf_token %}
+                            <input type="text" name="comment_text" placeholder="Add a comment..." required 
+                                style="flex: 1; background: rgba(255,255,255,0.2); border: none; border-radius: 20px; padding: 5px 12px; color: white; font-size: 0.8rem; outline: none;">
+                            <button type="submit" style="background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center;"><span class="material-icons" style="font-size: 1.1rem;">send</span></button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="reel-actions">
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">favorite_border</span></button>
+                        <span>4.2k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle" onclick="toggleReelComment('{{ reel.id }}')"><span class="material-icons">chat_bubble_outline</span></button>
+                        <span>{{ reel.reel_comments.count }}</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">send</span></button>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">more_horiz</span></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Play/Pause Indicator Overlay -->
+            <div class="play-pause-indicator material-icons" style="display: none;">play_arrow</div>
+        </div>
+        {% empty %}
+        <!-- Dummy Reel 1 -->
+        <div class="reel-item snap-always snap-center">
+            
+            <video class="reel-video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" loop playsinline></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-info">
+                    <div class="reel-user">
+                        <img src="https://i.pravatar.cc/150?u=nature" alt="Profile" class="reel-avatar">
+                        <span class="reel-username">nature_lover</span>
+                        <button class="reel-follow-btn">Follow</button>
+                    </div>
+                    <div class="reel-caption">
+                        <p>A breathtaking view from the peak! ⛰️🌲</p>
+                    </div>
+                    <div class="reel-location">
+                        <span class="material-icons" style="font-size: 14px;">place</span> Rocky Mountains
+                    </div>
+                </div>
+                
+                <div class="reel-actions">
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">favorite_border</span></button>
+                        <span>8.5k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">chat_bubble_outline</span></button>
+                        <span>342</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">send</span></button>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">more_horiz</span></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Play/Pause Indicator Overlay -->
+            <div class="play-pause-indicator material-icons" style="display: none;">play_arrow</div>
+        </div>
+
+        <!-- Dummy Reel 2 -->
+        <div class="reel-item snap-always snap-center">
+            
+            <video class="reel-video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" loop playsinline></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-info">
+                    <div class="reel-user">
+                        <img src="https://i.pravatar.cc/150?u=food" alt="Profile" class="reel-avatar">
+                        <span class="reel-username">foodie_adventures</span>
+                        <button class="reel-follow-btn">Follow</button>
+                    </div>
+                    <div class="reel-caption">
+                        <p>Experiencing the best street food! 🥗🌭</p>
+                    </div>
+                    <div class="reel-location">
+                        <span class="material-icons" style="font-size: 14px;">place</span> Night Market
+                    </div>
+                </div>
+                
+                <div class="reel-actions">
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">favorite_border</span></button>
+                        <span>12k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">chat_bubble_outline</span></button>
+                        <span>890</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">send</span></button>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">more_horiz</span></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Play/Pause Indicator Overlay -->
+            <div class="play-pause-indicator material-icons" style="display: none;">play_arrow</div>
+        </div>
+        <!-- Dummy Reel 3 -->
+        <div class="reel-item snap-always snap-center">
+            
+            <video class="reel-video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" loop playsinline></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-info">
+                    <div class="reel-user">
+                        <img src="https://i.pravatar.cc/150?u=travel" alt="Profile" class="reel-avatar">
+                        <span class="reel-username">travel_diaries</span>
+                        <button class="reel-follow-btn">Follow</button>
+                    </div>
+                    <div class="reel-caption">
+                        <p>Lost in the beauty of these mountains 🚗🌅</p>
+                    </div>
+                    <div class="reel-location">
+                        <span class="material-icons" style="font-size: 14px;">place</span> Pacific Coast
+                    </div>
+                </div>
+                
+                <div class="reel-actions">
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">favorite_border</span></button>
+                        <span>45k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">chat_bubble_outline</span></button>
+                        <span>1.2k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">send</span></button>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">more_horiz</span></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Play/Pause Indicator Overlay -->
+            <div class="play-pause-indicator material-icons" style="display: none;">play_arrow</div>
+        </div>
+
+        <!-- Dummy Reel 4 -->
+        <div class="reel-item snap-always snap-center">
+            
+            <video class="reel-video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" loop playsinline></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-info">
+                    <div class="reel-user">
+                        <img src="https://i.pravatar.cc/150?u=tech" alt="Profile" class="reel-avatar">
+                        <span class="reel-username">tech_guru</span>
+                        <button class="reel-follow-btn">Follow</button>
+                    </div>
+                    <div class="reel-caption">
+                        <p>Unboxing the ultimate gadget! 🔥📦</p>
+                    </div>
+                    <div class="reel-location">
+                        <span class="material-icons" style="font-size: 14px;">place</span> Studio
+                    </div>
+                </div>
+                
+                <div class="reel-actions">
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">favorite_border</span></button>
+                        <span>10k</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">chat_bubble_outline</span></button>
+                        <span>320</span>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">send</span></button>
+                    </div>
+                    <div class="reel-action">
+                        <button class="action-btn-circle"><span class="material-icons">more_horiz</span></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Play/Pause Indicator Overlay -->
+            <div class="play-pause-indicator material-icons" style="display: none;">play_arrow</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const videos = document.querySelectorAll('.reel-video');
+        const reelItems = document.querySelectorAll('.reel-item');
+        
+        // Setup Intersection Observer to play/pause videos on scroll
+        const observerOptions = {
+            root: document.querySelector('.reels-wrapper'),
+            rootMargin: '0px',
+            threshold: 0.6
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('.reel-video');
+                if (!video) return;
+
+                if (entry.isIntersecting) {
+                    // Try to play the video if it's in view
+                    video.play().catch(e => {
+                        console.log('Play prevented by browser policy. User interaction required.');
+                        // Let the user click to play
+                    });
+                } else {
+                    // Pause the video when it leaves the view
+                    video.pause();
+                    video.currentTime = 0; // optionally reset to start
+                }
+            });
+        }, observerOptions);
+
+        reelItems.forEach(item => {
+            observer.observe(item);
+            
+            const video = item.querySelector('.reel-video');
+            const indicator = item.querySelector('.play-pause-indicator');
+            
+            // Toggle play/pause on click anywhere on the reel item
+            item.addEventListener('click', (e) => {
+                // Don't trigger if clicking on an action button or username
+                if(e.target.closest('.reel-actions') || e.target.closest('.reel-info')) {
+                    return;
+                }
+                
+                if(video.paused) {
+                    video.play();
+                    showIndicator(indicator, 'play_arrow');
+                } else {
+                    video.pause();
+                    showIndicator(indicator, 'pause');
+                }
+            });
+        });
+
+        function showIndicator(indicatorElement, iconName) {
+            indicatorElement.textContent = iconName;
+            indicatorElement.style.display = 'block';
+            indicatorElement.classList.remove('fade-out');
+            
+            // Trigger animation reflow
+            void indicatorElement.offsetWidth;
+            
+            indicatorElement.classList.add('fade-out');
+            
+            setTimeout(() => {
+                indicatorElement.style.display = 'none';
+            }, 800);
+        }
+    });
+
+    function toggleReelComment(reelId) {
+        const section = document.getElementById(`reel-comment-section-${reelId}`);
+        if (section.style.display === 'none') {
+            section.style.display = 'flex';
+            section.querySelector('input').focus();
+        } else {
+            section.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Instagram Ultra</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+ 
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <!-- Sidebar (UNCHANGED) -->
+    <aside class="w-64 bg-white sidebar flex flex-col justify-between hidden md:flex flex-shrink-0">
+        <div class="p-6">
+            <a href="index.html" class="mb-10 flex items-center gap-2">
+                <img src="../assets/images/logo.png" class="h-8 w-8">
+                <h1 class="text-2xl font-bold text-gradient">Instagram</h1>
+            </a>
+
+            <nav class="space-y-2">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                    <span class="material-icons">home</span> Home
+                </a>
+
+                <a href="edit-profile.html"
+                    class="flex items-center gap-4 p-3 rounded-lg bg-gray-100 font-semibold text-gray-900">
+                    <span class="material-icons">settings</span> Edit Profile
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+
+        <div class="max-w-2xl mx-auto pt-8 px-4 pb-20">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Edit Profile</h2>
+
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+
+                <form class="space-y-6">
+
+                    <!-- Profile -->
+                    <div class="flex items-center gap-6">
+                        <img id="profilePreview" src="../assets/images/avatar1.jpg"
+                            class="w-16 h-16 rounded-full object-cover border border-gray-300">
+
+                        <label class="secondary-btn cursor-pointer">
+                            Change Photo
+                            <input type="file" id="imageInput" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-semibold text-gray-900 text-sm">Username</label>
+                        <input type="text" value="current_user" class="custom-input">
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-semibold text-gray-900 text-sm">Name / Bio</label>
+                        <input type="text" value="John Doe" class="custom-input">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-semibold text-gray-900 text-sm">Description</label>
+                        <textarea rows="3" class="custom-input resize-none">Photographer & Developer 📸💻</textarea>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-semibold text-gray-900 text-sm">Location / Link</label>
+                        <input type="text" value="linktr.ee/johndoe" class="custom-input">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end gap-4 pt-4">
+                        <button type="button" class="secondary-btn">Cancel</button>
+                        <button type="submit" class="primary-btn">Save Changes</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+<script src="../js/script.js"></script>
+
+</html>

@@ -1,0 +1,296 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ uid.username }} • Connecto</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=11">
+    <link rel="stylesheet" href="{% static 'myapp/css/profile.css' %}?v=11">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <!-- <aside class="sidebar">
+            <div class="logo-container">
+                <a href="{% url 'home' %}" class="logo-text">Connecto</a>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode"
+                    style="border:none; cursor:pointer;">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-link">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'explore' %}" class="nav-link">
+                    <span class="material-icons">explore</span>
+                    <span>Explore</span>
+                </a>
+                <a href="{% url 'messages' %}" class="nav-link">
+                    <span class="material-icons">chat_bubble_outline</span>
+                    <span>Messages</span>
+                </a>
+                <a href="{% url 'notifications' %}" class="nav-link">
+                    <span class="material-icons">favorite_border</span>
+                    <span>Notifications</span>
+                </a>
+                <a href="{% url 'create-post' %}" class="nav-link">
+                    <span class="material-icons">add_box</span>
+                    <span>Create Post</span>
+                </a>
+                <a href="{% url 'upload_reel' %}" class="nav-link">
+                    <span class="material-icons">movie_creation</span>
+                    <span>Upload Reel</span>
+                </a>
+                <a href="{% url 'profile' %}" class="nav-link active">
+                    <span class="material-icons">person</span>
+                    <span>Profile</span>
+                </a>
+                <a href="{% url 'settings' %}" class="nav-link">
+                    <span class="material-icons">settings</span>
+                    <span>Settings</span>
+                </a>
+
+                <div style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{% url 'logout' %}" class="nav-link logout-link">
+                        <span class="material-icons">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside> -->
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <a href="{% url 'home' %}" class="logo-text">Connecto</a>
+                <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode" style="border:none; cursor:pointer;">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'explore' %}" class="nav-link {% if request.resolver_match.url_name == 'explore' %}active{% endif %}">
+                    <span class="material-icons">explore</span>
+                    <span>Explore</span>
+                </a>
+                <a href="{% url 'reels' %}" class="nav-link {% if request.resolver_match.url_name == 'reels' %}active{% endif %}">
+                    <span class="material-icons">movie</span>
+                    <span>Reels</span>
+                </a>
+                <a href="{% url 'messages' %}" class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}">
+                    <span class="material-icons">chat_bubble_outline</span>
+                    <span>Messages</span>
+                </a>
+                <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <span class="material-icons">favorite_border</span>
+                    <span>Notifications</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'create-post' or request.resolver_match.url_name == 'upload_reel' or request.resolver_match.url_name == 'create_story' %}active{% endif %}" onclick="toggleCreateDropdown(event)">
+                        <span class="material-icons">add_circle_outline</span>
+                        <span>Create</span>
+                        <span class="material-icons expand-icon" style="margin-left:auto;">expand_more</span>
+                    </a>
+                    <div class="dropdown-menu" id="createDropdown" style="display: none; padding-left: 3rem; flex-direction: column;">
+                        <a href="{% url 'create-post' %}" class="nav-link {% if request.resolver_match.url_name == 'create-post' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">add_box</span>
+                            <span style="font-size: 0.9rem;">Create Post</span>
+                        </a>
+                        <a href="{% url 'upload_reel' %}" class="nav-link {% if request.resolver_match.url_name == 'upload_reel' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">movie_creation</span>
+                            <span style="font-size: 0.9rem;">Upload Reel</span>
+                        </a>
+                        <a href="{% url 'create_story' %}" class="nav-link {% if request.resolver_match.url_name == 'create_story' %}active{% endif %}" style="padding: 0.5rem 1rem;">
+                            <span class="material-icons" style="font-size: 1.2rem;">auto_stories</span>
+                            <span style="font-size: 0.9rem;">Create Story</span>
+                        </a>
+                    </div>
+                </div>
+                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <span class="material-icons">person_outline</span>
+                    <span>Profile</span>
+                </a>
+                <a href="{% url 'settings' %}" class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <span class="material-icons">settings</span>
+                    <span>Settings</span>
+                </a>
+                
+                <div style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{% url 'logout' %}" class="nav-link" style="color: #f43f5e;">
+                        <span class="material-icons">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content profile-main">
+            <div class="profile-page-container">
+
+                <!-- Profile Top Header -->
+                <header class="profile-info-header animate-fade-in">
+                    <div class="profile-avatar-area">
+                        <div class="profile-avatar-ring">
+                            <img src="{{uid.profile_pic.url}}" alt="{{uid.username}}">
+                        </div>
+                    </div>
+
+                    <div class="profile-bio-area">
+                        <div class="profile-title-row">
+                            <h2 class="profile-username">{{uid.username}}</h2>
+                            <div class="profile-header-actions">
+                                <a href="{% url 'edit_profile' %}" class="btn-pill btn-secondary profile-edit-btn">Edit
+                                    Profile</a>
+                                <a class="material-icons settings-cog" href="{% url 'settings' %}">settings</a>
+                            </div>
+                        </div>
+
+                        <div class="profile-stats-row">
+                            <div class="stat-item"><strong>{{ mypost.count }}</strong> posts</div>
+                            <a href="{% url 'followers' %}" class="stat-item"><strong>{{ followers_count }}</strong> followers</a>
+                            <a href="{% url 'following' %}" class="stat-item"><strong>{{ following_count }}</strong> following</a>
+                        </div>
+
+                        <div class="profile-description">
+                            <h1 class="profile-display-name">{{uid.name|default:uid.username}}</h1>
+                            <p class="profile-bio-text">{{uid.bio|default:""}}</p>
+                            {% if uid.link %}
+                            <a href="{{uid.link}}" class="profile-link" target="_blank">{{uid.link}}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Post Grid -->
+                <div class="profile-tabs-header" id="profileTabs">
+                    <div class="tab-item active" data-target="posts-grid"><span class="material-icons">grid_on</span> POSTS</div>
+                    <div class="tab-item" data-target="reels-grid"><span class="material-icons">movie_filter</span> REELS</div>
+                    <div class="tab-item" data-target="saved-grid"><span class="material-icons">bookmark_border</span> SAVED</div>
+                    <div class="tab-item" data-target="tagged-grid"><span class="material-icons">portrait</span> TAGGED</div>
+                </div>
+
+                <!-- POSTS GRID -->
+                <div class="profile-posts-grid animate-fade-in tab-content active" id="posts-grid">
+                    {% for i in mypost %}
+                    <div class="profile-grid-item">
+                        <img src="{{i.image.url}}" alt="Post">
+                        <div class="item-overlay">
+                            <div class="overlay-stat"><span class="material-icons">favorite</span> 124</div>
+                            <div class="overlay-stat"><span class="material-icons">chat_bubble</span> 18</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-posts" style="grid-column: span 3; text-align: center; padding: 5rem 0;">
+                        <span class="material-icons" style="font-size: 4rem; color: var(--text-muted); opacity: 0.5;">photo_camera</span>
+                        <p style="color: var(--text-muted); margin-top: 1rem;">No posts shared yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- REELS GRID -->
+                <div class="profile-posts-grid animate-fade-in tab-content" id="reels-grid" style="display: none;">
+                    <div class="no-posts" style="grid-column: span 3; text-align: center; padding: 5rem 0;">
+                        <span class="material-icons" style="font-size: 4rem; color: var(--text-muted); opacity: 0.5;">movie_filter</span>
+                        <p style="color: var(--text-muted); margin-top: 1rem;">No reels created yet.</p>
+                    </div>
+                </div>
+
+                <!-- SAVED GRID -->
+                <div class="profile-posts-grid animate-fade-in tab-content" id="saved-grid" style="display: none;">
+                    <div class="no-posts" style="grid-column: span 3; text-align: center; padding: 5rem 0;">
+                        <span class="material-icons" style="font-size: 4rem; color: var(--text-muted); opacity: 0.5;">bookmark_border</span>
+                        <p style="color: var(--text-muted); margin-top: 1rem;">Only you can see what you've saved.</p>
+                    </div>
+                </div>
+
+                <!-- TAGGED GRID -->
+                <div class="profile-posts-grid animate-fade-in tab-content" id="tagged-grid" style="display: none;">
+                    <div class="no-posts" style="grid-column: span 3; text-align: center; padding: 5rem 0;">
+                        <span class="material-icons" style="font-size: 4rem; color: var(--text-muted); opacity: 0.5;">portrait</span>
+                        <p style="color: var(--text-muted); margin-top: 1rem;">Photos and videos of you.</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('.material-icons');
+
+        function toggleCreateDropdown(event) {
+        event.preventDefault();
+        const dropdownMenu = document.getElementById('createDropdown');
+        const expandIcon = event.currentTarget.querySelector('.expand-icon');
+        if (dropdownMenu.style.display === 'none') {
+            dropdownMenu.style.display = 'flex';
+            expandIcon.textContent = 'expand_less';
+        } else {
+            dropdownMenu.style.display = 'none';
+            expandIcon.textContent = 'expand_more';
+        }
+    }
+
+        // Theme initialization
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+
+        // Profile Tabs Functionality
+        const tabs = document.querySelectorAll('.tab-item');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                    content.classList.remove('active');
+                });
+
+                const targetId = tab.getAttribute('data-target');
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.style.display = 'grid';
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

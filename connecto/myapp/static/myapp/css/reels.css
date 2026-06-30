@@ -1,0 +1,256 @@
+/* Reels Component Styles */
+
+.reels-container {
+    display: flex;
+    justify-content: center;
+    background: var(--bg-body, #0a0a0a); /* Match dark theme for better video pop */
+    height: 100vh;
+    margin-top: -2rem; /* offset padding from main-content */
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Scroll snap wrapper */
+.reels-wrapper {
+    height: calc(100vh - 2rem);
+    width: 100%;
+    max-width: 460px; /* Matched perfectly with the screenshot layout */
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none; /* Firefox */
+    background: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+}
+
+.reels-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Individual Reel Card */
+.reel-item {
+    scroll-snap-align: center;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    flex: 0 0 100%;
+    background-color: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Make sure video fits properly */
+.reel-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 'cover' ensures the video perfectly fills the reel container */
+}
+
+/* Overlay elements (info & actions) */
+.reel-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem 1rem 2rem 1rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    color: white;
+    box-sizing: border-box;
+    pointer-events: none; /* Let clicks pass through overlay except for buttons */
+}
+
+/* Bottom info container */
+.reel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: 75%;
+    pointer-events: auto; /* Enable clicks on info area */
+}
+
+.reel-user {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.reel-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.reel-username {
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    font-family: var(--font-heading, 'Inter', sans-serif);
+}
+
+.reel-follow-btn {
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reel-follow-btn:hover {
+    background: white;
+    color: black;
+}
+
+.reel-caption {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    font-family: 'DM Sans', sans-serif;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.reel-location {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Right-side action buttons */
+.reel-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.2rem;
+    pointer-events: auto; /* Enable clicks on buttons */
+}
+
+.reel-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.reel-action span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.action-btn-circle {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.action-btn-circle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+}
+
+.action-btn-circle .material-icons {
+    font-size: 1.8rem;
+}
+
+/* Empty State */
+.empty-reels {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    background: #111;
+}
+
+.empty-reels .material-icons {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: rgba(255,255,255,0.5);
+}
+
+.upload-link-btn {
+    margin-top: 1.5rem;
+    background: var(--primary-color, #f43f5e);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.upload-link-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Play/Pause Indicator Animation */
+.play-pause-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px !important;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.fade-out {
+    animation: fadeOut 0.8s ease forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+
+@media (max-width: 768px) {
+    .reels-container {
+        height: calc(100vh - 70px); /* adjust if there is bottom nav or headers */
+        margin-top: -1rem;
+    }
+    .reels-wrapper {
+        max-width: 100%;
+        border-radius: 0;
+    }
+}

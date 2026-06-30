@@ -1,0 +1,134 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .settings-wrapper {
+        display: flex;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        overflow: hidden;
+        margin: 1rem 0;
+        min-height: 70vh;
+    }
+    .settings-sidebar {
+        width: 300px;
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 0;
+    }
+    .settings-tab {
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .settings-tab:hover {
+        background: var(--accent-hover);
+        color: var(--text-primary);
+    }
+    .settings-tab.active {
+        color: var(--accent-primary);
+        border-right: 3px solid var(--accent-primary);
+        background: var(--accent-hover);
+    }
+    .settings-content {
+        flex: 1;
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .settings-block {
+        margin-bottom: 2rem;
+    }
+    .settings-block h3 {
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-body);
+    }
+    .form-group input, .form-group select {
+        width: 100%;
+        max-width: 400px;
+        padding: 0.8rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-main);
+        color: var(--text-primary);
+        font-family: inherit;
+        outline: none;
+    }
+    .form-group input:focus {
+        border-color: var(--accent-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feed-section" style="max-width: 1100px;">
+    <h2 class="page-title" style="font-family: 'Playfair Display', serif; margin-bottom: 1rem;">Settings</h2>
+    
+    <div class="settings-wrapper animate-fade-in">
+        <div class="settings-sidebar">
+            <div class="settings-tab active">
+                <span class="material-icons">account_circle</span>
+                Account
+            </div>
+            <div class="settings-tab">
+                <span class="material-icons">notifications</span>
+                Notifications
+            </div>
+            <div class="settings-tab">
+                <span class="material-icons">lock</span>
+                Privacy & Security
+            </div>
+            <div class="settings-tab">
+                <span class="material-icons">palette</span>
+                Theme
+            </div>
+        </div>
+
+        <div class="settings-content">
+            <div class="settings-block">
+                <h3>Account Information</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Update your account settings like email, password, and privacy options.</p>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" value="user@example.com" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label>Account Privacy</label>
+                    <select disabled>
+                        <option>Public</option>
+                        <option>Private</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <a href="{% url 'edit_profile' %}" class="btn-pill btn-secondary" style="margin-top: 1rem;">Go to Edit Profile</a>
+                </div>
+            </div>
+            
+            <div class="settings-block" style="border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                <h3>Danger Zone</h3>
+                <button class="btn-pill" style="background: #D32F2F; color: white;">Deactivate Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,389 @@
+/* =============================================
+   VIEW STORY — Full-Screen Immersive Viewer
+   Instagram-style with progress bars & controls
+   ============================================= */
+
+/* ---- Full-screen overlay ---- */
+.story-viewer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.92);
+    align-items: center;
+    justify-content: center;
+    animation: overlayFadeIn 0.3s ease both;
+}
+
+.story-viewer-overlay.active {
+    display: flex;
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ---- Story card - phone frame ---- */
+.story-viewer-card {
+    position: relative;
+    width: 380px;
+    height: 680px;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.08);
+    animation: cardSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    user-select: none;
+}
+
+@keyframes cardSlideIn {
+    from { transform: scale(0.88) translateY(30px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);       opacity: 1; }
+}
+
+/* ---- Media (image or video) ---- */
+.story-viewer-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+}
+
+/* ---- Gradient overlays ---- */
+.story-viewer-top-grad {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 160px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.story-viewer-bot-grad {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 180px;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ---- Progress bars ---- */
+.story-viewer-progress {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+
+.sv-prog-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+.sv-prog-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.sv-prog-bar.done .sv-prog-fill  { width: 100%; }
+.sv-prog-bar.active .sv-prog-fill { width: 0%; }
+
+/* ---- Header: avatar + close ---- */
+.story-viewer-header {
+    position: absolute;
+    top: 30px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.sv-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.sv-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid rgba(255,255,255,0.8);
+    box-shadow: 0 0 0 2px rgba(196,162,101, 0.6);
+}
+
+.sv-username {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.sv-timestamp {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.72rem;
+    margin-top: 1px;
+}
+
+.sv-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(6px);
+}
+
+.sv-close-btn:hover {
+    background: rgba(220,40,40,0.8);
+    transform: scale(1.1);
+}
+
+.sv-close-btn .material-icons {
+    color: #fff !important;
+    font-size: 1.2rem;
+}
+
+/* ---- Bottom: caption + reply ---- */
+.story-viewer-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.2rem 1.2rem 1.6rem;
+    z-index: 10;
+}
+
+.sv-caption {
+    color: #fff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    max-height: 80px;
+    overflow: hidden;
+}
+
+.sv-reply-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.sv-reply-input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 50px;
+    border: 1.5px solid rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.sv-reply-input::placeholder {
+    color: rgba(255,255,255,0.55);
+}
+
+.sv-reply-input:focus {
+    border-color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.18);
+}
+
+.sv-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(6px);
+}
+
+.sv-icon-btn:hover {
+    background: rgba(255,255,255,0.28);
+    transform: scale(1.08);
+}
+
+.sv-icon-btn .material-icons {
+    color: #fff !important;
+    font-size: 1.2rem;
+}
+
+/* ---- Nav arrows (previous/next story) ---- */
+.sv-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+.sv-nav-btn:hover {
+    background: rgba(255,255,255,0.28);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.sv-nav-btn .material-icons {
+    color: #fff !important;
+    font-size: 1.6rem;
+}
+
+.sv-nav-prev { left: -60px; }
+.sv-nav-next { right: -60px; }
+
+/* ---- Mute button ---- */
+.sv-mute-btn {
+    position: absolute;
+    bottom: 120px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(6px);
+    z-index: 10;
+}
+
+.sv-mute-btn:hover { background: rgba(0,0,0,0.75); }
+.sv-mute-btn .material-icons { color: #fff !important; font-size: 1.1rem; }
+
+/* ---- Emoji reaction row ---- */
+.sv-reactions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+}
+
+.sv-reaction-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    border-radius: 50px;
+    padding: 5px 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(6px);
+}
+
+.sv-reaction-btn:hover {
+    background: rgba(255,255,255,0.28);
+    transform: scale(1.2);
+}
+
+/* ---- Pause overlay tap area ---- */
+.sv-left-tap,
+.sv-right-tap {
+    position: absolute;
+    top: 0;
+    width: 40%;
+    height: 100%;
+    z-index: 5;
+    cursor: pointer;
+}
+
+.sv-left-tap  { left: 0; }
+.sv-right-tap { right: 0; }
+
+/* ---- Story Ring on home story cards ---- */
+.story-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    min-width: 72px;
+}
+
+.story-card:hover { transform: scale(1.06); }
+
+/* Viewed state ring */
+.story-avatar.viewed {
+    background: linear-gradient(135deg, #ccc, #aaa) !important;
+}
+
+/* Add Story card special */
+.story-card.add-story .story-avatar {
+    background: var(--accent-hover) !important;
+    border: 2px dashed var(--accent-primary);
+}
+
+.story-card.add-story .story-avatar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+}
+
+.story-add-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-add-icon .material-icons {
+    font-size: 1.2rem;
+    color: #fff !important;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 500px) {
+    .story-viewer-card {
+        width: 100vw;
+        height: 100dvh;
+        border-radius: 0;
+    }
+
+    .sv-nav-prev { left: 8px; }
+    .sv-nav-next { right: 8px; }
+}

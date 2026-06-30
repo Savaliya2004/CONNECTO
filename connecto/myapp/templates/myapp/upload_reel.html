@@ -1,0 +1,145 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/upload_reel.css' %}?v=3">
+{% endblock %}
+
+{% block content %}
+<div class="create-reel-wrapper">
+    <form method="POST" action="{% url 'upload_reel' %}" enctype="multipart/form-data" class="create-reel-card">
+        {% csrf_token %}
+        
+        <!-- Left Side: Video Preview Area -->
+        <div class="create-reel-left">
+            <div id="dropZone" class="reel-upload-placeholder">
+                <div class="upload-icon">
+                    <span class="material-icons">movie_creation</span>
+                </div>
+                <h3>Share a Reel</h3>
+                <p>Upload a vertical video to engage your audience</p>
+                <!-- Video file input -->
+                <label class="btn-pill upload-btn">
+                    Select Video
+                    <input type="file" name="video" id="videoInput" accept="video/mp4,video/x-m4v,video/*" hidden required onchange="handleVideoSelect(event)">
+                </label>
+            </div>
+            
+            <div id="previewContainer" class="reel-preview-container hidden">
+                <video id="videoPreview" controls autoplay loop muted></video>
+                <button type="button" class="remove-preview" onclick="resetUpload()">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Side: Reel Details Area -->
+        <div class="create-reel-right">
+            <!-- User Header -->
+            <div class="reel-detail-header">
+                <div class="user-info">
+                    <img src="{{uid.profile_pic.url}}" alt="Avatar" class="mini-avatar">
+                    <span class="user-name">{{uid.username}}</span>
+                </div>
+                <button type="submit" class="share-submit-btn">Share Reel</button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="reel-detail-body">
+                
+                <div class="form-section">
+                    <label class="section-label">Caption</label>
+                    <textarea name="caption" placeholder="Write a compelling caption for your reel... Don't forget tags!" required class="caption-textarea"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="section-label">Location</label>
+                    <div class="location-picker">
+                        <div class="location-selected" onclick="toggleLocation()">
+                            <span class="material-icons">location_on</span>
+                            <span id="locName">Add location to increase reach</span>
+                            <input type="hidden" name="location" id="locInput">
+                        </div>
+                        <div id="locDropdown" class="location-dropdown hidden">
+                            <input type="text" placeholder="Search places..." onkeyup="searchLoc(this)" class="loc-search">
+                            <ul class="loc-list">
+                                <li onclick="setLoc('New York, NY')">New York, NY</li>
+                                <li onclick="setLoc('London, UK')">London, UK</li>
+                                <li onclick="setLoc('Los Angeles, CA')">Los Angeles, CA</li>
+                                <li onclick="setLoc('Paris, FR')">Paris, FR</li>
+                                <li onclick="setLoc('Mumbai, IN')">Mumbai, IN</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section premium-row">
+                    <span class="row-text">Advanced Settings</span>
+                    <span class="material-icons">chevron_right</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function handleVideoSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            document.getElementById('videoPreview').src = url;
+            document.getElementById('previewContainer').classList.remove('hidden');
+            document.getElementById('dropZone').classList.add('hidden');
+        }
+    }
+
+    function resetUpload() {
+        document.getElementById('videoInput').value = '';
+        document.getElementById('videoPreview').src = '';
+        document.getElementById('previewContainer').classList.add('hidden');
+        document.getElementById('dropZone').classList.remove('hidden');
+    }
+
+    function handleThumbnailSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imgPreview = document.getElementById('thumbnailPreview');
+                imgPreview.src = event.target.result;
+                imgPreview.style.display = 'block';
+                document.getElementById('thumbnailText').innerText = file.name;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function toggleLocation() {
+        document.getElementById('locDropdown').classList.toggle('hidden');
+    }
+
+    function setLoc(val) {
+        document.getElementById('locName').innerText = val;
+        document.getElementById('locInput').value = val;
+        toggleLocation();
+    }
+
+    function searchLoc(el) {
+        const query = el.value.toLowerCase();
+        const items = document.querySelectorAll('.loc-list li');
+        items.forEach(i => {
+            i.style.display = i.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
+    }
+
+    // Close dropdowns if clicking out
+    window.onclick = function(event) {
+        if (!event.target.closest('.location-picker')) {
+            const dropdown = document.getElementById('locDropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/edit_profile.css' %}?v=10">
+{% endblock %}
+
+{% block content %}
+<main class="edit-profile-wrapper animate-fade-in">
+    <div class="edit-profile-container">
+        <h2 class="page-title">Edit Profile</h2>
+
+        <div class="edit-profile-card">
+            <form action="{% url 'edit_profile' %}" method="post" enctype="multipart/form-data" class="edit-form">
+                {% csrf_token %}
+                
+                <!-- Avatar Upload Section -->
+                <div class="avatar-upload-section">
+                    <div class="profile-preview-ring">
+                        <img id="profilePreview" src="{{uid.profile_pic.url}}" alt="Profile">
+                    </div>
+                    <div class="upload-controls">
+                        <label class="btn-pill btn-secondary upload-btn-mini">
+                            <span class="material-icons">photo_camera</span>
+                            <span>Change Photo</span>
+                            <input hidden type="file" name="profile_pic" accept="image/*" class="hidden filechoose" onchange="previewImage(event)">
+                        </label>
+                        <p class="upload-hint">Luxury avatars should be square and clear.</p>
+                    </div>
+                </div>
+
+                <!-- Form Grid -->
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <input type="text" name="username" value="{{uid.username}}" class="theme-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Full Name</label>
+                        <input type="text" name="name" value="{{uid.name|default:''}}" class="theme-input">
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="input-label">Bio / Headline</label>
+                        <input type="text" name="bio" value="{{uid.bio|default:''}}" placeholder="Luxury curator..." class="theme-input">
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="input-label">About You</label>
+                        <textarea name="description" rows="4" class="theme-input theme-textarea">{{uid.description|default:''}}</textarea>
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="input-label">Website / Portfolio</label>
+                        <input type="text" name="website" value="{{uid.link|default:''}}" placeholder="https://..." class="theme-input">
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'profile' %}" class="btn-pill btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-pill btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('profilePreview').src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+{% endblock %}

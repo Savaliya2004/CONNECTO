@@ -1,0 +1,401 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Viewer — Connecto</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=12">
+    <link rel="stylesheet" href="{% static 'myapp/css/view_story.css' %}?v=1">
+    <style>
+        body {
+            background: #0a0a0a !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     STORY VIEWER STAGE
+     Stories are loaded from data-stories JSON on page embed,
+     or from dummy data below for standalone demo.
+     ============================================================ -->
+
+<div id="storyViewerOverlay" class="story-viewer-overlay active">
+
+    <!-- Previous Story -->
+    <button class="sv-nav-btn sv-nav-prev" id="btnPrevStory" onclick="changeStory(-1)" title="Previous">
+        <span class="material-icons">chevron_left</span>
+    </button>
+
+    <!-- Story Card -->
+    <div class="story-viewer-card" id="storyCard">
+
+        <!-- Progress bars -->
+        <div class="story-viewer-progress" id="svProgressBars"></div>
+
+        <!-- Header -->
+        <div class="story-viewer-header">
+            <div class="sv-user-info">
+                <img src="" alt="User" class="sv-avatar" id="svAvatar">
+                <div>
+                    <div class="sv-username" id="svUsername">username</div>
+                    <div class="sv-timestamp" id="svTimestamp">2h ago</div>
+                </div>
+            </div>
+            <button class="sv-close-btn" id="svCloseBtn" onclick="closeStoryViewer()">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <!-- Media -->
+        <img  src="" alt="Story" class="story-viewer-media" id="svImage"  style="display:none;">
+        <video src=""            class="story-viewer-media" id="svVideo"
+               autoplay muted playsinline loop  style="display:none;"></video>
+
+        <!-- Gradient overlays -->
+        <div class="story-viewer-top-grad"></div>
+        <div class="story-viewer-bot-grad"></div>
+
+        <!-- Tap zones (go prev/next) -->
+        <div class="sv-left-tap"  onclick="changeStory(-1)"></div>
+        <div class="sv-right-tap" onclick="changeStory(1)"></div>
+
+        <!-- Mute button (only for video) -->
+        <button class="sv-mute-btn" id="svMuteBtn" onclick="toggleMute()" style="display:none;">
+            <span class="material-icons" id="svMuteIcon">volume_off</span>
+        </button>
+
+        <!-- Bottom -->
+        <div class="story-viewer-bottom">
+            <!-- Caption -->
+            <p class="sv-caption" id="svCaption"></p>
+
+            <!-- Emoji reactions -->
+            <div class="sv-reactions">
+                <button class="sv-reaction-btn" onclick="react('❤️')">❤️</button>
+                <button class="sv-reaction-btn" onclick="react('🔥')">🔥</button>
+                <button class="sv-reaction-btn" onclick="react('😮')">😮</button>
+                <button class="sv-reaction-btn" onclick="react('😂')">😂</button>
+                <button class="sv-reaction-btn" onclick="react('👏')">👏</button>
+            </div>
+
+            <!-- Reply row -->
+            <div class="sv-reply-row">
+                <input type="text" class="sv-reply-input" id="svReplyInput"
+                       placeholder="Reply to story…" onkeydown="handleReplyKey(event)">
+                <button class="sv-icon-btn" onclick="sendReply()">
+                    <span class="material-icons">send</span>
+                </button>
+                <button class="sv-icon-btn" onclick="shareStory()">
+                    <span class="material-icons">share</span>
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /storyCard -->
+
+    <!-- Next Story -->
+    <button class="sv-nav-btn sv-nav-next" id="btnNextStory" onclick="changeStory(1)" title="Next">
+        <span class="material-icons">chevron_right</span>
+    </button>
+
+</div>
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     ============================================================ -->
+<div id="svToast" style="
+    display:none; position:fixed; bottom:2.5rem; left:50%;
+    transform:translateX(-50%); background:rgba(0,0,0,0.82);
+    color:#fff; padding:10px 22px; border-radius:50px;
+    font-size:0.85rem; font-family:'DM Sans',sans-serif;
+    backdrop-filter:blur(10px); z-index:99999;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    transition: opacity 0.3s ease;">
+</div>
+
+<script>
+/* ============================================================
+   STORY DATA
+   In production: pass the /api/stories/ response here,
+   or render from Django context. Here we include both dynamic
+   (from Django context) and fallback dummy data.
+   ============================================================ */
+
+// Django context injection (populated by view)
+const DJANGO_STORIES = [
+    {% for story in stories %}
+    {
+        id:        {{ story.id }},
+        username:  "{{ story.user.username }}",
+        avatar:    "{{ story.user.profile_pic.url }}",
+        timestamp: "{{ story.created_at|timesince }} ago",
+        {% if story.video %}
+        type:      "video",
+        src:       "{{ story.video.url }}",
+        {% else %}
+        type:      "image",
+        src:       "{{ story.image.url }}",
+        {% endif %}
+        caption:   "{{ story.caption|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+// Fallback demo stories (shown when DB is empty / standalone demo)
+const DEMO_STORIES = [
+    {
+        id: 1, username: "aurora_vibes",
+        avatar: "https://i.pravatar.cc/150?u=story1",
+        timestamp: "2h ago", type: "image",
+        src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&q=80",
+        caption: "✨ Golden hour hits different at the mountains 🏔️"
+    },
+    {
+        id: 2, username: "lux_creator",
+        avatar: "https://i.pravatar.cc/150?u=story2",
+        timestamp: "4h ago", type: "image",
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80",
+        caption: "Morning trails 🌿 #nature #wellness"
+    },
+    {
+        id: 3, username: "the_noir_lens",
+        avatar: "https://i.pravatar.cc/150?u=story3",
+        timestamp: "6h ago", type: "image",
+        src: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&q=80",
+        caption: "Forest therapy 🌲 Breathe it in."
+    },
+    {
+        id: 4, username: "citylights_co",
+        avatar: "https://i.pravatar.cc/150?u=story4",
+        timestamp: "8h ago", type: "image",
+        src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80",
+        caption: "City that never sleeps 🌃✨"
+    },
+    {
+        id: 5, username: "wave_rider",
+        avatar: "https://i.pravatar.cc/150?u=story5",
+        timestamp: "12h ago", type: "image",
+        src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80",
+        caption: "Ocean peace 🌊 nothing beats it."
+    }
+];
+
+const stories = DJANGO_STORIES.length > 0 ? DJANGO_STORIES : DEMO_STORIES;
+
+/* ---- State ---- */
+let currentIndex  = parseInt(new URLSearchParams(location.search).get('index') || '0', 10);
+let progressTimer = null;
+let totalDuration = 7000; // ms per story
+let elapsed       = 0;
+let isMuted       = true;
+
+/* ---- Init ---- */
+document.addEventListener('DOMContentLoaded', () => {
+    buildProgressBars();
+    loadStory(currentIndex);
+});
+
+/* ---- Build progress bars ---- */
+function buildProgressBars() {
+    const container = document.getElementById('svProgressBars');
+    container.innerHTML = '';
+    stories.forEach((_, i) => {
+        const bar  = document.createElement('div');
+        bar.className = 'sv-prog-bar';
+        bar.id = 'progBar' + i;
+        const fill = document.createElement('div');
+        fill.className = 'sv-prog-fill';
+        fill.id = 'progFill' + i;
+        bar.appendChild(fill);
+        container.appendChild(bar);
+    });
+}
+
+/* ---- Load a story ---- */
+function loadStory(idx) {
+    if (idx < 0 || idx >= stories.length) {
+        closeStoryViewer();
+        return;
+    }
+    currentIndex = idx;
+    clearInterval(progressTimer);
+
+    const s       = stories[idx];
+    const img     = document.getElementById('svImage');
+    const vid     = document.getElementById('svVideo');
+    const muteBtn = document.getElementById('svMuteBtn');
+
+    // Avatar & meta
+    document.getElementById('svAvatar').src       = s.avatar;
+    document.getElementById('svUsername').textContent  = s.username;
+    document.getElementById('svTimestamp').textContent = s.timestamp;
+    document.getElementById('svCaption').textContent   = s.caption || '';
+
+    // Media
+    img.style.display = 'none';
+    vid.style.display = 'none';
+    muteBtn.style.display = 'none';
+
+    if (s.type === 'video') {
+        vid.src = s.src;
+        vid.muted = isMuted;
+        vid.play();
+        vid.style.display = 'block';
+        muteBtn.style.display = 'flex';
+        document.getElementById('svMuteIcon').textContent = isMuted ? 'volume_off' : 'volume_up';
+    } else {
+        img.src = s.src;
+        img.style.display = 'block';
+    }
+
+    // Nav buttons
+    document.getElementById('btnPrevStory').style.visibility = idx === 0 ? 'hidden' : 'visible';
+    document.getElementById('btnNextStory').style.visibility = idx === stories.length - 1 ? 'hidden' : 'visible';
+
+    // Progress bars — mark done, reset current
+    stories.forEach((_, i) => {
+        const fill = document.getElementById('progFill' + i);
+        fill.style.transition = 'none';
+        fill.style.width = i < idx ? '100%' : '0%';
+    });
+
+    // Animate current bar
+    elapsed = 0;
+    const fill    = document.getElementById('progFill' + idx);
+    const step    = 100;   // update ms
+    const total   = totalDuration;
+    let ticked    = 0;
+
+    setTimeout(() => {
+        fill.style.transition = 'width 0.1s linear';
+    }, 50);
+
+    progressTimer = setInterval(() => {
+        ticked += step;
+        const pct = Math.min((ticked / total) * 100, 100);
+        fill.style.width = pct + '%';
+        if (pct >= 100) {
+            clearInterval(progressTimer);
+            changeStory(1);
+        }
+    }, step);
+}
+
+/* ---- Change story ---- */
+function changeStory(dir) {
+    const next = currentIndex + dir;
+    loadStory(next);
+}
+
+/* ---- Close viewer ---- */
+function closeStoryViewer() {
+    clearInterval(progressTimer);
+    // If opened inside home, go back; else navigate home
+    if (document.referrer && document.referrer.includes(location.host)) {
+        history.back();
+    } else {
+        location.href = '/';
+    }
+}
+
+/* ---- Keyboard navigation ---- */
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight')  changeStory(1);
+    if (e.key === 'ArrowLeft')   changeStory(-1);
+    if (e.key === 'Escape')      closeStoryViewer();
+    if (e.key === ' ')           togglePause();
+});
+
+/* ---- Pause on card click (centre area) ---- */
+let paused = false;
+function togglePause() {
+    paused = !paused;
+    if (paused) {
+        clearInterval(progressTimer);
+        document.getElementById('svVideo').pause();
+    } else {
+        loadStory(currentIndex);
+        document.getElementById('svVideo').play();
+    }
+}
+
+/* ---- Mute toggle ---- */
+function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('svVideo').muted = isMuted;
+    document.getElementById('svMuteIcon').textContent = isMuted ? 'volume_off' : 'volume_up';
+}
+
+/* ---- Reactions ---- */
+function react(emoji) {
+    showToast('Reaction ' + emoji + ' sent!');
+    // Float emoji animation
+    const el = document.createElement('span');
+    el.textContent = emoji;
+    el.style.cssText = `
+        position:fixed; font-size:2.2rem; pointer-events:none; z-index:99999;
+        left:50%; bottom:160px; transform:translateX(-50%);
+        animation: floatUp 1s ease forwards;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1050);
+
+    if (!document.getElementById('floatKeyframes')) {
+        const style = document.createElement('style');
+        style.id = 'floatKeyframes';
+        style.textContent = `
+            @keyframes floatUp {
+                0%   { opacity:1; transform:translateX(-50%) translateY(0)   scale(1);   }
+                100% { opacity:0; transform:translateX(-50%) translateY(-90px) scale(1.4); }
+            }`;
+        document.head.appendChild(style);
+    }
+}
+
+/* ---- Reply ---- */
+function handleReplyKey(e) {
+    if (e.key === 'Enter') sendReply();
+}
+
+function sendReply() {
+    const input = document.getElementById('svReplyInput');
+    const val   = input.value.trim();
+    if (!val) return;
+    showToast('Reply sent: "' + val + '"');
+    input.value = '';
+}
+
+/* ---- Share ---- */
+function shareStory() {
+    if (navigator.share) {
+        navigator.share({ title: 'Check out this story on Connecto!', url: location.href });
+    } else {
+        navigator.clipboard.writeText(location.href).then(() => showToast('Link copied!'));
+    }
+}
+
+/* ---- Toast ---- */
+function showToast(msg) {
+    const t = document.getElementById('svToast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    t.style.opacity = '1';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+        t.style.opacity = '0';
+        setTimeout(() => t.style.display = 'none', 300);
+    }, 2200);
+}
+</script>
+
+</body>
+</html>

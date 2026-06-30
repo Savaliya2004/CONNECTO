@@ -1,0 +1,120 @@
+{% extends 'myapp/home.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/create_post.css' %}?v=8">
+{% endblock %}
+
+{% block content %}
+<div class="create-post-wrapper">
+    <form method="POST" action="{% url 'create-post' %}" enctype="multipart/form-data" class="create-post-card">
+        {% csrf_token %}
+        
+        <!-- Left Side: Image Upload & Preview -->
+        <div class="create-post-left">
+            <div id="dropZone" class="upload-placeholder">
+                <div class="upload-icon">
+                    <span class="material-icons">add_photo_alternate</span>
+                </div>
+                <h3>Create New Post</h3>
+                <p>Drag photos and videos here</p>
+                <label class="btn-pill btn-primary upload-btn">
+                    Select From Device
+                    <input type="file" name="image" id="fileInput" hidden required onchange="handleFileSelect(event)">
+                </label>
+            </div>
+            <div id="previewContainer" class="preview-container hidden">
+                <img id="imagePreview" src="#" alt="Preview">
+                <button type="button" class="remove-preview" onclick="resetUpload()">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Side: Post Details -->
+        <div class="create-post-right">
+            <!-- User Header -->
+            <div class="post-detail-header">
+                <div class="user-info">
+                    <img src="{{uid.profile_pic.url}}" alt="Avatar" class="mini-avatar">
+                    <span class="user-name">{{uid.username}}</span>
+                </div>
+                <button type="submit" class="share-submit-btn">Share Post</button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="post-detail-body">
+                <div class="form-section">
+                    <label class="section-label">Caption</label>
+                    <textarea name="caption" placeholder="Write a caption..." required class="caption-textarea"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="section-label">Location</label>
+                    <div class="location-picker">
+                        <div class="location-selected" onclick="toggleLocation()">
+                            <span class="material-icons">location_on</span>
+                            <span id="locName">Add a location</span>
+                            <input type="hidden" name="location" id="locInput">
+                        </div>
+                        <div id="locDropdown" class="location-dropdown hidden">
+                            <input type="text" placeholder="Search..." onkeyup="searchLoc(this)" class="loc-search">
+                            <ul class="loc-list">
+                                <li onclick="setLoc('New York, NY')">New York, NY</li>
+                                <li onclick="setLoc('London, UK')">London, UK</li>
+                                <li onclick="setLoc('Dubai, UAE')">Dubai, UAE</li>
+                                <li onclick="setLoc('Paris, FR')">Paris, FR</li>
+                                <li onclick="setLoc('Tokyo, JP')">Tokyo, JP</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section premium-row">
+                    <span class="row-text">Accessibility Settings</span>
+                    <span class="material-icons">chevron_right</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('imagePreview').src = event.target.result;
+                document.getElementById('previewContainer').classList.remove('hidden');
+                document.getElementById('dropZone').classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function resetUpload() {
+        document.getElementById('fileInput').value = '';
+        document.getElementById('previewContainer').classList.add('hidden');
+        document.getElementById('dropZone').classList.remove('hidden');
+    }
+
+    function toggleLocation() {
+        document.getElementById('locDropdown').classList.toggle('hidden');
+    }
+
+    function setLoc(val) {
+        document.getElementById('locName').innerText = val;
+        document.getElementById('locInput').value = val;
+        toggleLocation();
+    }
+
+    function searchLoc(el) {
+        const query = el.value.toLowerCase();
+        const items = document.querySelectorAll('.loc-list li');
+        items.forEach(i => {
+            i.style.display = i.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}

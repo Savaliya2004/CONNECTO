@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post - Instagram Ultra</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 sidebar flex flex-col justify-between hidden md:flex">
+        <div class="p-6">
+            <a href="index.html" class="mb-10 flex items-center gap-2">
+                <img src="../assets/images/logo.png" class="h-8 w-8">
+                <h1 class="text-2xl font-bold text-gradient">Instagram</h1>
+            </a>
+
+            <nav class="space-y-2">
+                <a href="index.html" class="flex items-center gap-4 p-3 rounded-lg">
+                    <span class="material-icons">home</span> Home
+                </a>
+
+                <a href="create-post.html" class="flex items-center gap-4 p-3 rounded-lg bg-gray-100 font-semibold">
+                    <span class="material-icons">add_box</span> Create Post
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 flex justify-center items-center p-6">
+
+        <div class="w-full max-w-5xl bg-white rounded-2xl border flex overflow-hidden">
+
+            <!-- LEFT IMAGE -->
+            <div class="w-3/5 bg-gray-100 flex items-center justify-center relative">
+
+                <div id="uploadBox" class="text-center">
+                    <span class="material-icons text-6xl">photo_library</span>
+                    <p class="mt-3 text-sm">Select Image</p>
+
+                    <label class="primary-btn mt-4 inline-block cursor-pointer">
+                        Upload
+                        <input type="file" id="fileInput" hidden>
+                    </label>
+                </div>
+
+                <img id="previewImage" class="hidden absolute w-full h-full object-cover top-0 left-0">
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="flex-1 flex flex-col">
+
+                <!-- HEADER -->
+                <div class="p-4 flex justify-between items-center border-b">
+                    <div class="flex items-center gap-3">
+                        <img src="../assets/images/avatar1.jpg" class="w-8 h-8 rounded-full">
+                        <h3 class="text-sm font-semibold">current_user</h3>
+                    </div>
+
+                    <button class="primary-btn text-sm px-4 py-2">Share</button>
+                </div>
+
+                <!-- BODY -->
+                <div class="flex-1 overflow-y-auto">
+
+                    <!-- CAPTION -->
+                    <div class="p-4 border-b">
+                        <textarea class="custom-input h-28 resize-none" placeholder="Write a caption..."></textarea>
+
+                        <div class="flex justify-between mt-2 text-sm">
+                            <span class="material-icons cursor-pointer">sentiment_satisfied_alt</span>
+                            <span class="text-gray-400">0 / 2200</span>
+                        </div>
+                    </div>
+
+                    <!-- LOCATION DROPDOWN -->
+                    <div class="p-4 border-b">
+
+                        <details class="dropdown">
+                            <summary class="dropdown-btn flex justify-between items-center cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-icons">location_on</span>
+                                    <span id="selectedLocation">Add location</span>
+                                </div>
+                                <span class="material-icons">expand_more</span>
+                            </summary>
+
+                            <div class="dropdown-menu mt-2 rounded-lg">
+                                <input type="text" placeholder="Search location..." class="custom-input text-sm m-2">
+
+                                <ul>
+                                    <li onclick="selectLocation(this)">Ahmedabad</li>
+                                    <li onclick="selectLocation(this)">Mumbai</li>
+                                    <li onclick="selectLocation(this)">Delhi</li>
+                                    <li onclick="selectLocation(this)">Bangalore</li>
+                                    <li onclick="selectLocation(this)">London</li>
+                                    <li onclick="selectLocation(this)">New York</li>
+                                </ul>
+                            </div>
+                        </details>
+
+                    </div>
+
+                    <!-- TAG PEOPLE -->
+                    <div class="p-4 border-b flex items-center gap-2">
+                        <span class="material-icons">person_add</span>
+                        <input type="text" placeholder="Tag people" class="bg-transparent outline-none text-sm w-full">
+                    </div>
+
+                    <!-- ADVANCED -->
+                    <div class="p-4 flex justify-between items-center cursor-pointer">
+                        <span class="text-sm font-medium">Advanced Settings</span>
+                        <span class="material-icons">expand_more</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- JS -->
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const previewImage = document.getElementById("previewImage");
+        const uploadBox = document.getElementById("uploadBox");
+
+        fileInput.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (file) {
+                previewImage.src = URL.createObjectURL(file);
+                previewImage.classList.remove("hidden");
+                uploadBox.style.display = "none";
+            }
+        });
+
+        // location select
+        function selectLocation(el) {
+            document.getElementById("selectedLocation").innerText = el.innerText;
+            el.closest("details").removeAttribute("open");
+        }
+    </script>
+</body>
+
+</html> 
