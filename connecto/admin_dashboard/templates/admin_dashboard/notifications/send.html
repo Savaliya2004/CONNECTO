@@ -1,0 +1,68 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Send System Notifications{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Notifications</span></div>
+    <h1 class="page-title">Send Notifications</h1>
+    <p class="page-subtitle">Send announcements, system warning, or promotions to users</p>
+  </div>
+</div>
+
+<div class="charts-grid mb-6">
+  <!-- Notification Form -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">📣 Send New Notification</span></div>
+    <div class="card-body">
+      {% if success %}
+      <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-sm); padding:12px; color:var(--success); font-size:13px; margin-bottom:20px;">
+        ✅ Notification sent successfully!
+      </div>
+      {% endif %}
+      
+      <form method="POST" action="{% url 'admin_dashboard:notifications_send' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="id_notif_type">Notification Type</label>
+          {{ form.notification_type }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_notif_title">Title</label>
+          {{ form.title }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_notif_message">Message</label>
+          {{ form.message }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_notif_target">Target Audience</label>
+          {{ form.target }}
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Broadcast Notification 🚀</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recent Sent Broadcasts -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">📋 Recent Sent Broadcasts</span></div>
+    <div class="card-body" style="padding: 0; max-height:480px; overflow-y:auto;">
+      {% for notif in recent_notifications %}
+      <div style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div class="flex justify-between items-center mb-1">
+          <span class="badge badge-accent">{{ notif.get_notification_type_display }}</span>
+          <span class="text-muted text-xs">{{ notif.created_at|date:"M d, Y H:i" }}</span>
+        </div>
+        <div class="fw-600 text-sm" style="color:var(--text); margin-bottom:4px;">{{ notif.title }}</div>
+        <p class="text-muted text-xs" style="margin-bottom:6px;">{{ notif.message }}</p>
+        <div class="text-xs" style="color:var(--accent);">Audience: {{ notif.get_target_display }}</div>
+      </div>
+      {% empty %}
+      <div class="empty-state"><div class="empty-state-msg">No broadcasts sent yet</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,21 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify OTP - Connecto</title>
     <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=5">
     <link rel="stylesheet" href="{% static 'myapp/css/login.css' %}?v=5">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="login-card">
-        <h1 class="logo-text login-logo">Connecto</h1>
+        <div style="display:flex; justify-content:center; margin-bottom:16px;">
+            <a href="/" class="logo-text-new">
+                <!-- <span class="logo-icon-new">⚡</span> -->
+                <span class="logo-label-new">CONNECTO</span>
+            </a>
+        </div>
         <p class="subtitle login-subtitle">Enter the OTP sent to your email.</p>
 
         {% if e_msg %}
-            <div class="login-error" style="margin-top: 10px;">{{ e_msg }}</div>
+        <div class="login-error" style="margin-top: 10px;">{{ e_msg }}</div>
         {% endif %}
 
         <div id="otp-timer-container" class="timer-wrapper">
@@ -28,15 +36,16 @@
             {% csrf_token %}
 
             <div class="form-group login-form-group">
-                <input type="hidden" name="email" value="{{ email }}" placeholder="email@example.com" required class="login-input">
+                <input type="hidden" name="email" value="{{ email }}" placeholder="email@example.com" required
+                    class="login-input">
             </div>
-            
+
 
             <div class="form-group login-form-group">
                 <label class="login-label">OTP</label>
                 <input type="number" name="otp" id="otp-input" placeholder="123456" required class="login-input">
             </div>
-            
+
             <button type="submit" id="verify-btn" class="btn-pill btn-primary login-btn-submit">Verify</button>
         </form>
 
@@ -83,9 +92,17 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .disabled-link {
@@ -108,7 +125,7 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             let timeLeft = 30;
             const timerDisplay = document.getElementById('timer');
             const verifyBtn = document.getElementById('verify-btn');
@@ -116,7 +133,7 @@
             const resendLink = document.getElementById('resend-link');
             const timerWrapper = document.getElementById('otp-timer-container');
 
-            const countdown = setInterval(function() {
+            const countdown = setInterval(function () {
                 timeLeft--;
                 timerDisplay.textContent = timeLeft;
 
@@ -127,14 +144,14 @@
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     timerDisplay.textContent = "0";
-                    
+
                     // Disable input and verify button
                     otpInput.disabled = true;
                     verifyBtn.disabled = true;
-                    
+
                     // Enable resend link
                     resendLink.classList.remove('disabled-link');
-                    
+
                     // Update label
                     document.querySelector('.timer-label').textContent = "OTP Expired";
                     document.querySelector('.timer-unit').style.display = 'none';
@@ -143,4 +160,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,0 +1,285 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}User: @{{ user.username }}{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="{% url 'admin_dashboard:user_list' %}">Users</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>@{{ user.username }}</span>
+    </div>
+    <h1 class="page-title">@{{ user.username }}</h1>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'admin_dashboard:user_edit' user.id %}" class="btn btn-primary btn-sm">✏️ Edit User</a>
+  </div>
+</div>
+
+<!-- Profile Header -->
+<div class="user-profile-header">
+  <div class="user-avatar" style="width:80px; height:80px; font-size:28px; font-weight:800; flex-shrink:0; border: 3px solid var(--accent);">
+    {% if user.profile_pic %}
+      <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+    {% else %}
+      {{ user.username|first|upper }}
+    {% endif %}
+  </div>
+  <div style="flex: 1;">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <h2 style="font-size: 20px; font-weight: 800;">@{{ user.username }}</h2>
+      {% if verification_status.is_verified %}
+        <span class="badge badge-blue">✅ Verified</span>
+      {% endif %}
+      {% if active_suspension %}
+        <span class="badge badge-danger">🚫 {{ active_suspension.get_action_display }}</span>
+      {% else %}
+        <span class="badge badge-success">🟢 Active</span>
+      {% endif %}
+    </div>
+    <div style="color: var(--muted); font-size: 13px; margin-top: 4px;">{{ user.name|default:"No display name" }} · {{ user.email }}</div>
+    <div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Joined {{ user.created_at|date:"F d, Y" }} · {{ user.gender|default:"N/A"|title }}</div>
+    {% if user.bio %}<div style="font-size: 13px; margin-top: 8px; max-width: 500px;">{{ user.bio }}</div>{% endif %}
+  </div>
+  <div class="user-profile-stats">
+    <div class="user-stat">
+      <div class="user-stat-value gradient-text">{{ post_count }}</div>
+      <div class="user-stat-label">Posts</div>
+    </div>
+    <div class="user-stat">
+      <div class="user-stat-value gradient-text">{{ follower_count }}</div>
+      <div class="user-stat-label">Followers</div>
+    </div>
+    <div class="user-stat">
+      <div class="user-stat-value gradient-text">{{ following_count }}</div>
+      <div class="user-stat-label">Following</div>
+    </div>
+    <div class="user-stat">
+      <div class="user-stat-value gradient-text">{{ story_count }}</div>
+      <div class="user-stat-label">Stories</div>
+    </div>
+    <div class="user-stat">
+      <div class="user-stat-value" style="color: var(--danger);">{{ reports.count }}</div>
+      <div class="user-stat-label">Reports</div>
+    </div>
+    <div class="user-stat">
+      <div class="user-stat-value" style="color: var(--warning);">{{ warnings.count }}</div>
+      <div class="user-stat-label">Warnings</div>
+    </div>
+  </div>
+</div>
+
+<!-- Action Bar -->
+<div class="card mb-4">
+  <div class="card-body" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-activate" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="activate">
+      <button type="submit" class="btn btn-success btn-sm">✅ Activate</button>
+    </form>
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-suspend" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="suspend"><input type="hidden" name="reason" value="Admin manual suspend">
+      <button type="button" class="btn btn-warning btn-sm" onclick="confirmAction('Suspend @{{ user.username }}?','form-suspend')">⏸ Suspend</button>
+    </form>
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-ban" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="ban"><input type="hidden" name="reason" value="Admin manual ban">
+      <button type="button" class="btn btn-danger btn-sm" onclick="confirmAction('Ban @{{ user.username }}?','form-ban')">🚫 Ban</button>
+    </form>
+    {% if not verification_status.is_verified %}
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-verify" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="verify">
+      <button type="submit" class="btn btn-primary btn-sm">✅ Verify Account</button>
+    </form>
+    {% else %}
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-unverify" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="unverify">
+      <button type="submit" class="btn btn-ghost btn-sm">❌ Remove Verification</button>
+    </form>
+    {% endif %}
+    <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="form-delete" style="display:inline;">
+      {% csrf_token %}<input type="hidden" name="action" value="delete">
+      <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('PERMANENTLY delete @{{ user.username }} and all their data?','form-delete')">🗑 Delete User</button>
+    </form>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="posts">🖼️ Posts ({{ post_count }})</button>
+    <button class="tab-btn" data-tab="stories">📸 Stories ({{ story_count }})</button>
+    <button class="tab-btn" data-tab="followers">👥 Followers ({{ follower_count }})</button>
+    <button class="tab-btn" data-tab="following">🔗 Following ({{ following_count }})</button>
+    <button class="tab-btn" data-tab="reports">🚩 Reports ({{ reports.count }})</button>
+    <button class="tab-btn" data-tab="warnings">⚠️ Warnings ({{ warnings.count }})</button>
+    <button class="tab-btn" data-tab="logs">📋 Activity</button>
+  </div>
+
+  <!-- Posts Tab -->
+  <div id="tab-posts" class="tab-content active">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:12px; padding:16px 0;">
+      {% for post in posts|slice:":30" %}
+      <div class="card" style="padding:0; overflow:hidden; position:relative;">
+        {% if post.image %}
+          <img src="{{ post.image.url }}" style="width:100%; height:160px; object-fit:cover;" alt="">
+        {% else %}
+          <div style="width:100%; height:160px; background:var(--bg); display:flex;align-items:center;justify-content:center; font-size:32px;">🖼️</div>
+        {% endif %}
+        <div style="padding:10px; font-size:11px; color:var(--muted);">
+          <div class="truncate">{{ post.caption|default:"No caption" }}</div>
+          <div style="margin-top:4px;">{{ post.created_at|date:"M d, Y" }}</div>
+          <form method="POST" action="{% url 'admin_dashboard:post_action' post.id %}" style="margin-top:6px;" id="del-post-{{ post.id }}">
+            {% csrf_token %}<input type="hidden" name="action" value="delete">
+            <button type="button" class="btn btn-danger btn-xs w-full"
+                    onclick="confirmDelete('Delete this post?','del-post-{{ post.id }}')">🗑 Delete</button>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">🖼️</div><div class="empty-state-msg">No posts yet</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Stories Tab -->
+  <div id="tab-stories" class="tab-content">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:12px; padding:16px 0;">
+      {% for story in stories|slice:":20" %}
+      <div class="card" style="padding:0; overflow:hidden;">
+        {% if story.image %}<img src="{{ story.image.url }}" style="width:100%;height:200px;object-fit:cover;" alt="">
+        {% else %}<div style="width:100%;height:200px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:32px;">📸</div>{% endif %}
+        <div style="padding:8px;font-size:11px;color:var(--muted);">{{ story.created_at|date:"M d, Y" }}</div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-msg">No stories</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Followers Tab -->
+  <div id="tab-followers" class="tab-content">
+    <div class="table-wrapper" style="margin-top:16px;">
+      <table class="admin-table">
+        <thead><tr><th>Follower</th><th>Since</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for follow in followers|slice:":50" %}
+          <tr>
+            <td>
+              <a href="{% url 'admin_dashboard:user_detail' follow.following.id %}" class="user-cell">
+                <div class="user-avatar" style="width:30px;height:30px;font-size:11px;">{{ follow.following.username|first|upper }}</div>
+                <span class="user-name" style="font-size:13px;">@{{ follow.following.username }}</span>
+              </a>
+            </td>
+            <td class="text-muted text-sm">{{ follow.created_at|date:"M d, Y" }}</td>
+            <td><a href="{% url 'admin_dashboard:user_detail' follow.following.id %}" class="btn btn-ghost btn-xs">View</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3"><div class="empty-state"><div class="empty-state-msg">No followers</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Following Tab -->
+  <div id="tab-following" class="tab-content">
+    <div class="table-wrapper" style="margin-top:16px;">
+      <table class="admin-table">
+        <thead><tr><th>Following</th><th>Since</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for follow in following|slice:":50" %}
+          <tr>
+            <td>
+              <a href="{% url 'admin_dashboard:user_detail' follow.following_person.id %}" class="user-cell">
+                <div class="user-avatar" style="width:30px;height:30px;font-size:11px;">{{ follow.following_person.username|first|upper }}</div>
+                <span class="user-name" style="font-size:13px;">@{{ follow.following_person.username }}</span>
+              </a>
+            </td>
+            <td class="text-muted text-sm">{{ follow.created_at|date:"M d, Y" }}</td>
+            <td><a href="{% url 'admin_dashboard:user_detail' follow.following_person.id %}" class="btn btn-ghost btn-xs">View</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3"><div class="empty-state"><div class="empty-state-msg">Not following anyone</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Reports Tab -->
+  <div id="tab-reports" class="tab-content">
+    <div class="table-wrapper" style="margin-top:16px;">
+      <table class="admin-table">
+        <thead><tr><th>Reporter</th><th>Reason</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td class="user-name" style="font-size:13px;">@{{ report.reporter.username }}</td>
+            <td><span class="badge badge-warning">{{ report.get_reason_display }}</span></td>
+            <td>
+              {% if report.status == 'pending' %}<span class="badge badge-danger">Pending</span>
+              {% elif report.status == 'reviewed' %}<span class="badge badge-warning">Reviewed</span>
+              {% elif report.status == 'dismissed' %}<span class="badge badge-muted">Dismissed</span>
+              {% else %}<span class="badge badge-success">Action Taken</span>{% endif %}
+            </td>
+            <td class="text-muted text-sm">{{ report.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="empty-state-msg">No reports filed</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Warnings Tab -->
+  <div id="tab-warnings" class="tab-content">
+    <div class="table-wrapper" style="margin-top:16px;">
+      <table class="admin-table">
+        <thead><tr><th>Reason</th><th>Severity</th><th>Issued By</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for warning in warnings %}
+          <tr>
+            <td class="text-sm">{{ warning.reason|truncatechars:60 }}</td>
+            <td>
+              {% if warning.severity == 'critical' %}<span class="badge badge-danger">Critical</span>
+              {% elif warning.severity == 'high' %}<span class="badge badge-warning">High</span>
+              {% elif warning.severity == 'medium' %}<span class="badge badge-blue">Medium</span>
+              {% else %}<span class="badge badge-muted">Low</span>{% endif %}
+            </td>
+            <td class="text-muted text-sm">{{ warning.issued_by.username }}</td>
+            <td class="text-muted text-sm">{{ warning.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="empty-state-msg">No warnings issued</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Activity Logs Tab -->
+  <div id="tab-logs" class="tab-content">
+    <div class="table-wrapper" style="margin-top:16px;">
+      <table class="admin-table">
+        <thead><tr><th>Action</th><th>Admin</th><th>Details</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for log in activity_logs %}
+          <tr>
+            <td><span class="badge badge-accent">{{ log.get_action_display }}</span></td>
+            <td class="text-muted text-sm">{{ log.admin.username|default:"System" }}</td>
+            <td class="text-muted text-sm truncate" style="max-width:200px;">{{ log.details|default:"—" }}</td>
+            <td class="text-muted text-sm">{{ log.created_at|date:"M d, Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="empty-state-msg">No activity logs</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end tabs-wrapper -->
+
+{% endblock %}

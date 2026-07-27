@@ -1,0 +1,62 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Edit User: @{{ user_obj.username }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'admin_dashboard:user_list' %}">Users</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="{% url 'admin_dashboard:user_detail' user_obj.id %}">@{{ user_obj.username }}</a>
+      <span class="breadcrumb-sep">/</span><span>Edit</span>
+    </div>
+    <h1 class="page-title">Edit User — @{{ user_obj.username }}</h1>
+  </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+  <div class="card-header">
+    <span class="card-title">✏️ User Information</span>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{% url 'admin_dashboard:user_edit' user_obj.id %}">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="id_edit_username">Username</label>
+          {{ form.username }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_edit_email">Email</label>
+          {{ form.email }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="id_edit_name">Display Name</label>
+          {{ form.name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_edit_gender">Gender</label>
+          {{ form.gender }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_edit_bio">Bio</label>
+        {{ form.bio }}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_edit_description">Description</label>
+        {{ form.description }}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_edit_link">Website Link</label>
+        {{ form.link }}
+      </div>
+      <div class="flex gap-2" style="margin-top: 8px;">
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        <a href="{% url 'admin_dashboard:user_detail' user_obj.id %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Messages Overview{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Messages</span></div>
+    <h1 class="page-title">Messages & Rooms Overview</h1>
+    <p class="page-subtitle">{{ total_messages }} messages total exchanged</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Room ID</th>
+          <th>Participant 1</th>
+          <th>Participant 2</th>
+          <th>Total Messages</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for room in chat_rooms %}
+        <tr>
+          <td class="text-sm font-semibold text-accent">#Room_{{ room.id }}</td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' room.user1.id %}" class="user-cell">
+              <span class="user-name" style="font-size:13px;">@{{ room.user1.username }}</span>
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' room.user2.id %}" class="user-cell">
+              <span class="user-name" style="font-size:13px;">@{{ room.user2.username }}</span>
+            </a>
+          </td>
+          <td><span class="badge badge-accent">{{ room.message_count }}</span></td>
+          <td class="text-muted text-sm">{{ room.created_at|date:"M d, Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">✉️</div><div class="empty-state-msg">No messages or chat rooms found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if chat_rooms.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ chat_rooms.number }} of {{ chat_rooms.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if chat_rooms.has_previous %}<a href="?page={{ chat_rooms.previous_page_number }}" class="page-link">‹</a>{% endif %}
+      {% for num in chat_rooms.paginator.page_range %}
+        {% if chat_rooms.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > chat_rooms.number|add:'-3' and num < chat_rooms.number|add:'3' %}<a href="?page={{ num }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if chat_rooms.has_next %}<a href="?page={{ chat_rooms.next_page_number }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

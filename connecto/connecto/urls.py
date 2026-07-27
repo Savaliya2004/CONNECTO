@@ -20,8 +20,11 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('myapp.urls')),
+from django.shortcuts import redirect
 
+urlpatterns = [
+    path('admin/login/', lambda request: redirect('admin_dashboard:login')),
+    path('admin/', admin.site.urls),
+    path('', include('myapp.urls')),
+    path('control/', include('admin_dashboard.urls', namespace='admin_dashboard')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

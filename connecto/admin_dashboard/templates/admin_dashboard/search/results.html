@@ -1,0 +1,118 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Global Search Results{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Search</span></div>
+    <h1 class="page-title">Global Search Results</h1>
+    <p class="page-subtitle">Search query: "{{ query }}"</p>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="users">👥 Users ({{ results.users|length|default:0 }})</button>
+    <button class="tab-btn" data-tab="posts">🖼️ Posts ({{ results.posts|length|default:0 }})</button>
+    <button class="tab-btn" data-tab="comments">💬 Comments ({{ results.comments|length|default:0 }})</button>
+  </div>
+
+  <!-- Users tab -->
+  <div id="tab-users" class="tab-content active" style="margin-top:16px;">
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in results.users %}
+          <tr>
+            <td>
+              <a href="{% url 'admin_dashboard:user_detail' user.id %}" class="user-cell">
+                <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ user.username|first|upper }}</div>
+                <span class="user-name" style="font-size:13px;">@{{ user.username }}</span>
+              </a>
+            </td>
+            <td class="text-muted text-sm">{{ user.email }}</td>
+            <td class="text-muted text-sm">{{ user.created_at|date:"M d, Y" }}</td>
+            <td><a href="{% url 'admin_dashboard:user_detail' user.id %}" class="btn btn-ghost btn-xs">View Profile</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="empty-state-msg">No users match "{{ query }}"</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Posts tab -->
+  <div id="tab-posts" class="tab-content" style="margin-top:16px;">
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>User</th>
+            <th>Caption</th>
+            <th>Created At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in results.posts %}
+          <tr>
+            <td>
+              {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-thumb" style="width:36px;height:36px;" alt="">
+              {% else %}
+                <div class="post-thumb-placeholder" style="width:36px;height:36px;">🖼️</div>
+              {% endif %}
+            </td>
+            <td>@{{ post.user.username }}</td>
+            <td class="text-sm truncate" style="max-width:250px;">{{ post.caption|default:"—" }}</td>
+            <td class="text-muted text-sm">{{ post.created_at|date:"M d, Y" }}</td>
+            <td><a href="{% url 'admin_dashboard:user_detail' post.user.id %}" class="btn btn-ghost btn-xs">View User</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5"><div class="empty-state"><div class="empty-state-msg">No posts match "{{ query }}"</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Comments tab -->
+  <div id="tab-comments" class="tab-content" style="margin-top:16px;">
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Comment text</th>
+            <th>Post ID</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comment in results.comments %}
+          <tr>
+            <td>@{{ comment.user.username }}</td>
+            <td class="text-sm">{{ comment.comment_text }}</td>
+            <td>#Post_{{ comment.post.id }}</td>
+            <td class="text-muted text-sm">{{ comment.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><div class="empty-state-msg">No comments match "{{ query }}"</div></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

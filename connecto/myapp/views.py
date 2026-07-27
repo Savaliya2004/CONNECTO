@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from .models import * 
 from django.contrib.auth.hashers import make_password,check_password
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
 from .utils import myCustomMail , get_or_create_chatRoom
@@ -21,30 +23,64 @@ def checkLoggin(view_function):
     return wrapper
 
 def login(request):
+    next_url = request.GET.get('next', '')
     if request.POST:
         email = request.POST['email']
-        password =request.POST['password']
+        password = request.POST['password']
 
+        # 1. Try to authenticate as a Django Admin/Staff/Superuser first
+        username = email
+        if '@' in username:
+            try:
+                user_obj = User.objects.get(email__iexact=username)
+                username = user_obj.username
+            except User.DoesNotExist:
+                pass
+        
+        admin_user = authenticate(request, username=username, password=password)
+        if admin_user is not None and (admin_user.is_staff or admin_user.is_superuser):
+            # Log in to Django auth session
+            auth_login(request, admin_user)
+            # Log in to InstaUser session if there is a matching email
+            try:
+                inst_user = InstaUser.objects.get(email=admin_user.email)
+                request.session['email'] = inst_user.email
+            except InstaUser.DoesNotExist:
+                request.session['email'] = admin_user.email
+            
+            # Log activity
+            try:
+                from admin_dashboard.services import ActivityService
+                ActivityService.log(request, 'login', target_label=admin_user.username)
+            except Exception:
+                pass
+                
+            if next_url and next_url.startswith('/control/'):
+                return redirect(next_url)
+            return redirect('admin_dashboard:dashboard')
+
+        # 2. Otherwise, check if regular InstaUser exists
         try:
-            uid = InstaUser.objects.get(email = email)
-            if not check_password(password,uid.password):
+            uid = InstaUser.objects.get(email=email)
+            if not check_password(password, uid.password):
                 context = {
-                    'e_msg' : "Invalid Credentials !"
+                    'e_msg': "Invalid Credentials !"
                 }
-                return render(request,"myapp/login.html",context)
+                return render(request, "myapp/login.html", context)
             else:
-                request.session['email'] = email 
-                context = { 'uid' : uid }
-                print("----------->>> home",uid)
+                request.session['email'] = email
+                context = { 'uid': uid }
+                if next_url:
+                    return redirect(next_url)
                 return redirect("home")
 
-        except:
+        except InstaUser.DoesNotExist:
             context = {
-                'e_msg' : "User Not Found !"
+                'e_msg': "User Not Found !"
             }
-            return render(request,"myapp/login.html",context)
+            return render(request, "myapp/login.html", context)
 
-    return render(request,'myapp/login.html')
+    return render(request, 'myapp/login.html')
 
 def signup(request):
     if request.POST:

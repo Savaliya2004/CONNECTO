@@ -1,0 +1,87 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Comment Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Comments</span></div>
+    <h1 class="page-title">Comment Management</h1>
+    <p class="page-subtitle">{{ total_comments }} total comments</p>
+  </div>
+  <a href="{% url 'admin_dashboard:export_csv' 'comments' %}" class="btn btn-ghost btn-sm">⬇️ Export CSV</a>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:comment_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search comment text, username..." value="{{ filters.q }}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:comment_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Comment</th>
+          <th>Location (Type)</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comment in comments %}
+        <tr>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' comment.user.id %}" class="user-cell">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ comment.user.username|first|upper }}</div>
+              <span class="user-name" style="font-size:13px;">@{{ comment.user.username }}</span>
+            </a>
+          </td>
+          <td class="text-sm" style="max-width:300px; word-wrap: break-word; white-space: normal;">{{ comment.comment_text }}</td>
+          <td>
+            {% if comment.post %}
+              <span class="badge badge-accent">Post #{{ comment.post.id }}</span>
+            {% elif comment.reel %}
+              <span class="badge badge-blue">Reel #{{ comment.reel.id }}</span>
+            {% else %}
+              <span class="badge badge-muted">Unknown</span>
+            {% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ comment.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            <form method="POST" action="{% url 'admin_dashboard:comment_delete' comment.id %}" id="del-comment-{{ comment.id }}">
+              {% csrf_token %}
+              <button type="button" class="btn btn-danger btn-xs"
+                      onclick="confirmDelete('Delete this comment permanently?', 'del-comment-{{ comment.id }}')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">💬</div><div class="empty-state-msg">No comments found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if comments.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ comments.number }} of {{ comments.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if comments.has_previous %}<a href="?page={{ comments.previous_page_number }}&q={{ filters.q }}" class="page-link">‹</a>{% endif %}
+      {% for num in comments.paginator.page_range %}
+        {% if comments.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > comments.number|add:'-3' and num < comments.number|add:'3' %}<a href="?page={{ num }}&q={{ filters.q }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if comments.has_next %}<a href="?page={{ comments.next_page_number }}&q={{ filters.q }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

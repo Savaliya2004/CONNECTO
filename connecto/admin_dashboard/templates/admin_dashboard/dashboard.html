@@ -1,0 +1,392 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <span>🏠</span><span class="breadcrumb-sep">/</span><span>Dashboard</span>
+    </div>
+    <h1 class="page-title">Dashboard Overview</h1>
+    <p class="page-subtitle">Welcome back, {{ request.user.get_full_name|default:request.user.username }}. Here's what's
+      happening.</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'admin_dashboard:export_csv' 'users' %}" class="btn btn-ghost btn-sm">⬇️ Export Users</a>
+    <a href="{% url 'admin_dashboard:analytics' %}" class="btn btn-primary btn-sm">📊 Full Analytics</a>
+  </div>
+</div>
+
+<!-- ─── Stats Cards Row 1: Users ─────────────────────────────── -->
+<div class="stats-grid">
+
+  <div class="stat-card" id="stat-total-users">
+    <div class="stat-icon purple">👥</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_users|default:0 }}</div>
+      <div class="stat-label">Total Users</div>
+      <div class="stat-change up">↑ {{ stats.new_users_week }} this week</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-active-today">
+    <div class="stat-icon green">🟢</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.active_users_today|default:0 }}</div>
+      <div class="stat-label">Active Today</div>
+      <div class="stat-change up">↑ Today</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-new-week">
+    <div class="stat-icon blue">✨</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.new_users_week|default:0 }}</div>
+      <div class="stat-label">New This Week</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-total-posts">
+    <div class="stat-icon pink">🖼️</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_posts|default:0 }}</div>
+      <div class="stat-label">Total Posts</div>
+      <div class="stat-change up">↑ {{ stats.posts_today }} today</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-posts-today">
+    <div class="stat-icon orange">📸</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.posts_today|default:0 }}</div>
+      <div class="stat-label">Posts Today</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-stories-today">
+    <div class="stat-icon teal">📖</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.stories_today|default:0 }}</div>
+      <div class="stat-label">Stories Today</div>
+      <div class="stat-change" style="color: var(--muted);">{{ stats.total_stories }} total</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-reels-today">
+    <div class="stat-icon purple">🎬</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.reels_today|default:0 }}</div>
+      <div class="stat-label">Reels Today</div>
+      <div class="stat-change" style="color: var(--muted);">{{ stats.total_reels }} total</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-likes">
+    <div class="stat-icon yellow">❤️</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_likes|default:0 }}</div>
+      <div class="stat-label">Total Likes</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-comments">
+    <div class="stat-icon blue">💬</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_comments|default:0 }}</div>
+      <div class="stat-label">Comments</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-followers">
+    <div class="stat-icon green">🔗</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_followers|default:0 }}</div>
+      <div class="stat-label">Follow Relationships</div>
+    </div>
+  </div>
+
+  <div class="stat-card" id="stat-messages">
+    <div class="stat-icon teal">✉️</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.total_messages|default:0 }}</div>
+      <div class="stat-label">Messages Sent</div>
+    </div>
+  </div>
+
+  <div class="stat-card {% if stats.pending_reports > 0 %}gradient-border{% endif %}" id="stat-reports">
+    <div class="stat-icon red">🚩</div>
+    <div class="stat-info">
+      <div class="stat-value">{{ stats.pending_reports|default:0 }}</div>
+      <div class="stat-label">Pending Reports</div>
+      {% if stats.pending_reports > 0 %}
+      <div class="stat-change down pulse">⚠️ Needs attention</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Charts ────────────────────────────────────────────────── -->
+<div class="charts-grid mb-6">
+
+  <!-- Growth Chart -->
+  <div class="card" id="growth-chart-card">
+    <div class="card-header">
+      <span class="card-title">📈 Platform Growth</span>
+      <div class="chart-period-tabs">
+        <button class="chart-tab active" data-period="daily">Daily</button>
+        <button class="chart-tab" data-period="weekly">Weekly</button>
+        <button class="chart-tab" data-period="monthly">Monthly</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="chart-container">
+        <canvas id="growth-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engagement Chart -->
+  <div class="card" id="engagement-chart-card">
+    <div class="card-header">
+      <span class="card-title">💡 Engagement (Likes & Comments)</span>
+      <div class="chart-period-tabs">
+        <button class="chart-tab active" data-period="daily" onclick="loadChartData(this.dataset.period)">Daily</button>
+        <button class="chart-tab" data-period="weekly" onclick="loadChartData(this.dataset.period)">Weekly</button>
+        <button class="chart-tab" data-period="monthly" onclick="loadChartData(this.dataset.period)">Monthly</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="chart-container">
+        <canvas id="engagement-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Content Distribution + Activity -->
+<div class="charts-grid mb-6">
+
+  <!-- Content Distribution Doughnut -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🗂️ Content Distribution</span>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height:240px;">
+        <canvas id="content-chart" data-posts="{{ stats.total_posts }}" data-stories="{{ stats.total_stories }}"
+          data-reels="{{ stats.total_reels }}">
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Actions -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⚡ Quick Actions</span>
+    </div>
+    <div class="card-body">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <a href="{% url 'admin_dashboard:report_list' %}?status=pending" class="btn btn-danger w-full">
+          🚩 Review Pending Reports ({{ stats.pending_reports }})
+        </a>
+        <a href="{% url 'admin_dashboard:verification_list' %}?status=pending" class="btn btn-warning w-full">
+          ✅ Verification Requests ({{ stats.pending_verifications }})
+        </a>
+        <a href="{% url 'admin_dashboard:user_list' %}" class="btn btn-primary w-full">
+          👥 Manage Users
+        </a>
+        <a href="{% url 'admin_dashboard:notifications_send' %}" class="btn btn-ghost w-full">
+          🔔 Send Notification
+        </a>
+        <a href="{% url 'admin_dashboard:activity_logs' %}" class="btn btn-ghost w-full">
+          📋 View Activity Logs
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Tables Row ─────────────────────────────────────────────── -->
+<div
+  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(480px,1fr)); gap: 24px; margin-bottom: 28px;">
+
+  <!-- Top Active Users -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🏆 Most Followed Users</span>
+      <a href="{% url 'admin_dashboard:user_list' %}?sort=-follower_count" class="btn btn-ghost btn-xs">View All</a>
+    </div>
+    <div class="table-wrapper" style="border: none; border-radius: 0;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Followers</th>
+            <th>Posts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in top_users %}
+          <tr>
+            <td class="text-muted text-sm">{{ forloop.counter }}</td>
+            <td>
+              <a href="{% url 'admin_dashboard:user_detail' user.id %}" class="user-cell">
+                <div class="user-avatar">{{ user.username|first|upper }}</div>
+                <div>
+                  <div class="user-name">@{{ user.username }}</div>
+                  <div class="user-sub">{{ user.name|default:"—" }}</div>
+                </div>
+              </a>
+            </td>
+            <td><span class="badge badge-accent">{{ user.follower_count }}</span></td>
+            <td class="text-muted">{{ user.post_count }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-muted text-sm" style="text-align:center; padding:24px;">No users yet</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Most Liked Posts -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">❤️ Most Liked Posts</span>
+      <a href="{% url 'admin_dashboard:post_list' %}?sort=-like_count" class="btn btn-ghost btn-xs">View All</a>
+    </div>
+    <div class="table-wrapper" style="border: none; border-radius: 0;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Post</th>
+            <th>User</th>
+            <th>Likes</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in most_liked %}
+          <tr>
+            <td>
+              {% if post.image %}
+              <img src="{{ post.image.url }}" class="post-thumb" alt="Post">
+              {% else %}
+              <div class="post-thumb-placeholder">🖼️</div>
+              {% endif %}
+            </td>
+            <td>
+              <div class="user-name">@{{ post.user.username }}</div>
+              <div class="user-sub truncate" style="max-width:140px;">{{ post.caption|default:"No
+                caption"|truncatechars:30 }}</div>
+            </td>
+            <td><span class="badge badge-danger">❤️ {{ post.like_count }}</span></td>
+            <td class="text-muted">{{ post.comment_count }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-muted text-sm" style="text-align:center; padding:24px;">No posts yet</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Bottom Row ─────────────────────────────────────────────── -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 24px;">
+
+  <!-- Trending Hashtags -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">#️⃣ Trending Hashtags</span>
+      <a href="{% url 'admin_dashboard:hashtag_list' %}" class="btn btn-ghost btn-xs">View All</a>
+    </div>
+    <div class="card-body">
+      {% if trending_tags %}
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        {% for tag in trending_tags %}
+        <a href="{% url 'admin_dashboard:hashtag_list' %}?q={{ tag.tag }}" class="tag-pill">
+          #{{ tag.tag }}<span class="tag-count">{{ tag.count }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">#</div>
+        <div class="empty-state-msg">No hashtags found in posts</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Registrations -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">✨ Recent Registrations</span>
+    </div>
+    <div style="padding: 8px 0;">
+      {% for user in recent_users %}
+      <a href="{% url 'admin_dashboard:user_detail' user.id %}"
+        style="display: flex; align-items: center; gap: 12px; padding: 10px 22px; transition: var(--transition);"
+        class="nav-item" style="border-radius: 0;">
+        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 12px;">{{ user.username|first|upper }}
+        </div>
+        <div style="flex: 1;">
+          <div class="user-name" style="font-size: 13px;">@{{ user.username }}</div>
+          <div class="user-sub">{{ user.created_at|date:"M d, Y" }}</div>
+        </div>
+        <span class="badge badge-success">New</span>
+      </a>
+      {% empty %}
+      <div class="empty-state">
+        <div class="empty-state-msg">No recent users</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Most Reported Posts -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🚨 Most Reported Posts</span>
+      <a href="{% url 'admin_dashboard:report_list' %}" class="btn btn-ghost btn-xs">Review</a>
+    </div>
+    <div style="padding: 8px 0;">
+      {% for post in most_reported %}
+      <div
+        style="display: flex; align-items: center; gap: 12px; padding: 10px 22px; border-bottom: 1px solid var(--border);">
+        {% if post.image %}
+        <img src="{{ post.image.url }}" class="post-thumb" style="width:40px; height:40px;" alt="">
+        {% else %}
+        <div class="post-thumb-placeholder" style="width:40px; height:40px;">🖼️</div>
+        {% endif %}
+        <div style="flex: 1;">
+          <div class="user-name" style="font-size: 12px;">@{{ post.user.username }}</div>
+          <div class="user-sub truncate" style="max-width: 180px;">{{ post.caption|default:"No caption"|truncatechars:28
+            }}</div>
+        </div>
+        <span class="badge badge-danger">{{ post.report_count }} reports</span>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <div class="empty-state-msg">No reported posts</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

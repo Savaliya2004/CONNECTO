@@ -1,0 +1,84 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Admin Activity Logs{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Logs</span></div>
+    <h1 class="page-title">Admin Activity Audit Logs</h1>
+    <p class="page-subtitle">Security audit trail of all moderator and admin actions</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:activity_logs' %}">
+    <div class="filter-bar">
+      <select name="action" class="admin-select" style="max-width: 180px;">
+        <option value="">All Actions</option>
+        {% for code, label in action_choices %}
+        <option value="{{ code }}" {% if filters.action == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <input type="date" name="date_from" class="admin-input" value="{{ filters.date_from }}" style="max-width:160px;" title="From Date">
+      <input type="date" name="date_to" class="admin-input" value="{{ filters.date_to }}" style="max-width:160px;" title="To Date">
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_dashboard:activity_logs' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Admin</th>
+          <th>Action</th>
+          <th>Target</th>
+          <th>Details</th>
+          <th>IP Address</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>
+            <span class="user-name" style="font-size:13px;">{{ log.admin.username|default:"System" }}</span>
+          </td>
+          <td>
+            <span class="badge badge-accent">{{ log.get_action_display }}</span>
+          </td>
+          <td>
+            {% if log.target_label %}
+              <span class="text-sm font-semibold">{{ log.target_label }}</span>
+              <span class="text-xs text-muted" style="display:block;">{{ log.target_type }} #{{ log.target_id }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-sm" style="max-width:250px; word-wrap: break-word; white-space: normal;">{{ log.details|default:"—" }}</td>
+          <td class="text-muted text-sm">{{ log.ip_address }}</td>
+          <td class="text-muted text-sm">{{ log.created_at|date:"M d, Y H:i:s" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-msg">No logs found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if logs.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ logs.number }} of {{ logs.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if logs.has_previous %}<a href="?page={{ logs.previous_page_number }}&action={{ filters.action }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}" class="page-link">‹</a>{% endif %}
+      {% for num in logs.paginator.page_range %}
+        {% if logs.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > logs.number|add:'-3' and num < logs.number|add:'3' %}<a href="?page={{ num }}&action={{ filters.action }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if logs.has_next %}<a href="?page={{ logs.next_page_number }}&action={{ filters.action }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Reel Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Reels</span></div>
+    <h1 class="page-title">Reel Management</h1>
+    <p class="page-subtitle">{{ total_reels }} total reels</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:reel_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search caption, username..." value="{{ filters.q }}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:reel_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Reel</th>
+          <th>User</th>
+          <th>Caption</th>
+          <th>Location</th>
+          <th>Comments</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reel in reels %}
+        <tr>
+          <td>
+            <div class="post-thumb-placeholder">🎬</div>
+          </td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' reel.user.id %}" class="user-cell">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ reel.user.username|first|upper }}</div>
+              <span class="user-name" style="font-size:13px;">@{{ reel.user.username }}</span>
+            </a>
+          </td>
+          <td class="text-sm truncate" style="max-width:200px;">{{ reel.caption|default:"—" }}</td>
+          <td class="text-muted text-sm">{{ reel.location|default:"—" }}</td>
+          <td class="text-muted">{{ reel.comment_count }}</td>
+          <td class="text-muted text-sm">{{ reel.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            <form method="POST" action="{% url 'admin_dashboard:reel_delete' reel.id %}" id="del-reel-{{ reel.id }}">
+              {% csrf_token %}
+              <button type="button" class="btn btn-danger btn-xs"
+                      onclick="confirmDelete('Delete this reel permanently?', 'del-reel-{{ reel.id }}')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🎬</div><div class="empty-state-msg">No reels found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if reels.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ reels.number }} of {{ reels.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if reels.has_previous %}<a href="?page={{ reels.previous_page_number }}&q={{ filters.q }}" class="page-link">‹</a>{% endif %}
+      {% for num in reels.paginator.page_range %}
+        {% if reels.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > reels.number|add:'-3' and num < reels.number|add:'3' %}<a href="?page={{ num }}&q={{ filters.q }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if reels.has_next %}<a href="?page={{ reels.next_page_number }}&q={{ filters.q }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

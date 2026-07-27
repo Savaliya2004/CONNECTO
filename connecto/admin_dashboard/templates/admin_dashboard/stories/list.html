@@ -1,0 +1,98 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Story Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Stories</span></div>
+    <h1 class="page-title">Story Management</h1>
+    <p class="page-subtitle">{{ total_stories }} total stories</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:story_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search username, caption..." value="{{ filters.q }}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:story_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Story</th>
+          <th>User</th>
+          <th>Caption</th>
+          <th>Created At</th>
+          <th>Expires At</th>
+          <th>Audience</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for story in stories %}
+        <tr>
+          <td>
+            {% if story.image %}
+              <img src="{{ story.image.url }}" class="post-thumb" alt="Story Image">
+            {% elif story.video %}
+              <div class="post-thumb-placeholder">📹</div>
+            {% else %}
+              <div class="post-thumb-placeholder">📸</div>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' story.user.id %}" class="user-cell">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ story.user.username|first|upper }}</div>
+              <span class="user-name" style="font-size:13px;">@{{ story.user.username }}</span>
+            </a>
+          </td>
+          <td class="text-sm truncate" style="max-width:200px;">{{ story.caption|default:"—" }}</td>
+          <td class="text-muted text-sm">{{ story.created_at|date:"M d, Y H:i" }}</td>
+          <td class="text-muted text-sm">{{ story.expired_at|date:"M d, Y H:i" }}</td>
+          <td><span class="badge badge-accent">{{ story.audience|default:"Everyone"|title }}</span></td>
+          <td>
+            {% if story.is_expired %}
+              <span class="badge badge-muted">Expired</span>
+            {% else %}
+              <span class="badge badge-success">Active</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{% url 'admin_dashboard:story_delete' story.id %}" id="del-story-{{ story.id }}">
+              {% csrf_token %}
+              <button type="button" class="btn btn-danger btn-xs"
+                      onclick="confirmDelete('Delete this story permanently?', 'del-story-{{ story.id }}')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📸</div><div class="empty-state-msg">No stories found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if stories.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ stories.number }} of {{ stories.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if stories.has_previous %}<a href="?page={{ stories.previous_page_number }}&q={{ filters.q }}" class="page-link">‹</a>{% endif %}
+      {% for num in stories.paginator.page_range %}
+        {% if stories.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > stories.number|add:'-3' and num < stories.number|add:'3' %}<a href="?page={{ num }}&q={{ filters.q }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if stories.has_next %}<a href="?page={{ stories.next_page_number }}&q={{ filters.q }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

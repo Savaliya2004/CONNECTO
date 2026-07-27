@@ -1,0 +1,171 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Reports & Moderation{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Reports</span></div>
+    <h1 class="page-title">Reports & Moderation</h1>
+    <p class="page-subtitle">{{ total_pending }} pending reports require review</p>
+  </div>
+  <a href="{% url 'admin_dashboard:export_csv' 'reports' %}" class="btn btn-ghost btn-sm">⬇️ Export CSV</a>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:report_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search reporter/reported..." value="{{ filters.q }}">
+      </div>
+      <select name="status" class="admin-select" style="max-width: 150px;">
+        <option value="">All Statuses</option>
+        {% for code, label in status_choices %}
+        <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select name="reason" class="admin-select" style="max-width: 150px;">
+        <option value="">All Reasons</option>
+        {% for code, label in reason_choices %}
+        <option value="{{ code }}" {% if filters.reason == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:report_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Reporter</th>
+          <th>Reported User</th>
+          <th>Type / Item</th>
+          <th>Reason</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' report.reporter.id %}" class="user-cell">
+              <span class="user-name" style="font-size:13px;">@{{ report.reporter.username }}</span>
+            </a>
+          </td>
+          <td>
+            {% if report.reported_user %}
+              <a href="{% url 'admin_dashboard:user_detail' report.reported_user.id %}" class="user-cell">
+                <span class="user-name" style="font-size:13px;">@{{ report.reported_user.username }}</span>
+              </a>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if report.reported_post %}
+              <span class="badge badge-accent">Post #{{ report.reported_post.id }}</span>
+              {% if report.reported_post.image %}
+                <img src="{{ report.reported_post.image.url }}" class="post-thumb" style="width: 30px; height: 30px; margin-top: 4px; display: block;" alt="">
+              {% endif %}
+            {% else %}
+              <span class="badge badge-muted">Account</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-warning">{{ report.get_reason_display }}</span></td>
+          <td class="text-sm" style="max-width:200px; word-wrap: break-word; white-space: normal;">{{ report.description|default:"—" }}</td>
+          <td>
+            {% if report.status == 'pending' %}<span class="badge badge-danger">Pending</span>
+            {% elif report.status == 'reviewed' %}<span class="badge badge-warning">Reviewed</span>
+            {% elif report.status == 'dismissed' %}<span class="badge badge-muted">Dismissed</span>
+            {% else %}<span class="badge badge-success">Action Taken</span>{% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ report.created_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-xs" onclick="openReportModal('{{ report.id }}')">Action</button>
+            </div>
+            
+            <!-- Report Actions Modal -->
+            <div class="modal-overlay" id="report-modal-{{ report.id }}">
+              <div class="modal">
+                <div class="modal-header">
+                  <span class="modal-title">Moderate Report #{{ report.id }}</span>
+                  <button class="modal-close" onclick="Modal.close('report-modal-{{ report.id }}')">×</button>
+                </div>
+                <div class="modal-body">
+                  <p class="mb-4"><strong>Reporter:</strong> @{{ report.reporter.username }}</p>
+                  {% if report.reported_user %}
+                    <p class="mb-4"><strong>Reported Account:</strong> @{{ report.reported_user.username }}</p>
+                  {% endif %}
+                  <p class="mb-4"><strong>Reason:</strong> {{ report.get_reason_display }}</p>
+                  <p class="mb-4"><strong>Description:</strong> {{ report.description|default:"No description provided" }}</p>
+                  
+                  <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+                  
+                  <form method="POST" action="{% url 'admin_dashboard:report_action' report.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label class="form-label">Review Status</label>
+                      {{ action_form.action }}
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Admin Notes / Moderation Action Details</label>
+                      {{ action_form.admin_notes }}
+                    </div>
+                    <div class="flex justify-between mt-4">
+                      {% if report.reported_post %}
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('Delete the reported post permanently?', 'del-post-{{ report.reported_post.id }}'); Modal.close('report-modal-{{ report.id }}');">🗑️ Delete Content</button>
+                      {% endif %}
+                      <div class="flex gap-2" style="margin-left: auto;">
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="Modal.close('report-modal-{{ report.id }}')">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Save Action</button>
+                      </div>
+                    </div>
+                  </form>
+                  
+                  {% if report.reported_post %}
+                    <form method="POST" action="{% url 'admin_dashboard:post_action' report.reported_post.id %}" id="del-post-{{ report.reported_post.id }}" style="display:none;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="reason" value="Moderation action taken on report #{{ report.id }}">
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">🚩</div><div class="empty-state-msg">No reports found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if reports.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ reports.number }} of {{ reports.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if reports.has_previous %}<a href="?page={{ reports.previous_page_number }}&q={{ filters.q }}&status={{ filters.status }}&reason={{ filters.reason }}" class="page-link">‹</a>{% endif %}
+      {% for num in reports.paginator.page_range %}
+        {% if reports.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > reports.number|add:'-3' and num < reports.number|add:'3' %}<a href="?page={{ num }}&q={{ filters.q }}&status={{ filters.status }}&reason={{ filters.reason }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}&q={{ filters.q }}&status={{ filters.status }}&reason={{ filters.reason }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  function openReportModal(id) {
+    Modal.open('report-modal-' + id);
+  }
+</script>
+{% endblock %}

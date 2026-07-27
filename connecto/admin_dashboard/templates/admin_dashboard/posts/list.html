@@ -1,0 +1,123 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Post Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Posts</span></div>
+    <h1 class="page-title">Post Management</h1>
+    <p class="page-subtitle">{{ total_posts }} total posts</p>
+  </div>
+  <a href="{% url 'admin_dashboard:export_csv' 'posts' %}" class="btn btn-ghost btn-sm">⬇️ Export CSV</a>
+</div>
+
+<!-- Filter -->
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:post_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search caption, username, location..." value="{{ filters.q }}">
+      </div>
+      <input type="date" name="date_from" class="admin-input" value="{{ filters.date_from }}" style="max-width:160px;">
+      <input type="date" name="date_to" class="admin-input" value="{{ filters.date_to }}" style="max-width:160px;">
+      <select name="sort" class="admin-select" style="max-width:180px;">
+        <option value="-created_at" {% if filters.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+        <option value="created_at" {% if filters.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+        <option value="-like_count" {% if filters.sort == '-like_count' %}selected{% endif %}>Most Liked</option>
+        <option value="-comment_count" {% if filters.sort == '-comment_count' %}selected{% endif %}>Most Commented</option>
+        <option value="-report_count" {% if filters.sort == '-report_count' %}selected{% endif %}>Most Reported</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:post_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>User</th>
+          <th>Caption</th>
+          <th>Location</th>
+          <th>❤️ Likes</th>
+          <th>💬 Comments</th>
+          <th>🚩 Reports</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+        <tr>
+          <td>
+            {% if post.image %}
+              <img src="{{ post.image.url }}" class="post-thumb" alt="Post">
+            {% else %}
+              <div class="post-thumb-placeholder">🖼️</div>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' post.user.id %}" class="user-cell">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ post.user.username|first|upper }}</div>
+              <span class="user-name" style="font-size:13px;">@{{ post.user.username }}</span>
+            </a>
+          </td>
+          <td class="text-sm truncate" style="max-width:200px;">{{ post.caption|default:"—"|truncatechars:50 }}</td>
+          <td class="text-muted text-sm">{{ post.location|default:"—" }}</td>
+          <td><span class="badge badge-danger">{{ post.like_count }}</span></td>
+          <td class="text-muted">{{ post.comment_count }}</td>
+          <td>
+            {% if post.report_count > 0 %}
+              <span class="badge badge-warning pulse">{{ post.report_count }}</span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ post.created_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="flex gap-2">
+              <!-- Hide Form -->
+              <form method="POST" action="{% url 'admin_dashboard:post_action' post.id %}" id="hide-post-{{ post.id }}">
+                {% csrf_token %}<input type="hidden" name="action" value="hide">
+                <button type="submit" class="btn btn-ghost btn-xs" title="Hide">🙈</button>
+              </form>
+              <!-- Feature Form -->
+              <form method="POST" action="{% url 'admin_dashboard:post_action' post.id %}" id="feature-post-{{ post.id }}">
+                {% csrf_token %}<input type="hidden" name="action" value="feature">
+                <button type="submit" class="btn btn-ghost btn-xs" title="Feature">⭐</button>
+              </form>
+              <!-- Delete Form -->
+              <form method="POST" action="{% url 'admin_dashboard:post_action' post.id %}" id="del-post-{{ post.id }}">
+                {% csrf_token %}<input type="hidden" name="action" value="delete">
+                <button type="button" class="btn btn-danger btn-xs" title="Delete"
+                        onclick="confirmDelete('Delete this post permanently?','del-post-{{ post.id }}')">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">🖼️</div><div class="empty-state-msg">No posts found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if posts.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if posts.has_previous %}<a href="?page={{ posts.previous_page_number }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">‹</a>{% endif %}
+      {% for num in posts.paginator.page_range %}
+        {% if posts.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}<a href="?page={{ num }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if posts.has_next %}<a href="?page={{ posts.next_page_number }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

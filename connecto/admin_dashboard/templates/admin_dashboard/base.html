@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CONNECTO Admin Dashboard — Enterprise Social Media Management">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}{{ page_title|default:"Admin" }}{% endblock %} — CONNECTO Control</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Admin CSS -->
+  <link rel="stylesheet" href="{% static 'admin_dashboard/css/admin.css' %}">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- Django Messages as Toasts -->
+  {% if messages %}
+  {% for message in messages %}
+  <div data-toast="{{ message.tags }}" data-message="{{ message }}"></div>
+  {% endfor %}
+  {% endif %}
+
+  <div class="admin-layout">
+
+    <!-- ─── Sidebar ────────────────────────────────────────────────── -->
+    <nav class="sidebar" id="sidebar" role="navigation" aria-label="Admin navigation">
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <!-- <div class="logo-icon">⚡</div> -->
+        <span class="logo-text">CONNECTO</span>
+      </div>
+
+      <!-- Navigation -->
+      <div class="sidebar-nav">
+
+        <!-- Main -->
+        <div class="sidebar-section-title">Main</div>
+
+        <a href="{% url 'admin_dashboard:dashboard' %}"
+          class="nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+          <span class="nav-icon">🏠</span>
+          <span class="sidebar-label">Dashboard</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:analytics' %}"
+          class="nav-item {% if active_nav == 'analytics' %}active{% endif %}">
+          <span class="nav-icon">📊</span>
+          <span class="sidebar-label">Analytics</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:global_search' %}"
+          class="nav-item {% if active_nav == 'search' %}active{% endif %}">
+          <span class="nav-icon">🔍</span>
+          <span class="sidebar-label">Search</span>
+        </a>
+
+        <!-- Users -->
+        <div class="sidebar-section-title">Users</div>
+
+        <a href="{% url 'admin_dashboard:user_list' %}"
+          class="nav-item {% if active_nav == 'users' %}active{% endif %}">
+          <span class="nav-icon">👥</span>
+          <span class="sidebar-label">User Management</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:verification_list' %}"
+          class="nav-item {% if active_nav == 'verification' %}active{% endif %}">
+          <span class="nav-icon">✅</span>
+          <span class="sidebar-label">Verification</span>
+          {% if pending_verifications > 0 %}
+          <span class="nav-badge">{{ pending_verifications }}</span>
+          {% endif %}
+        </a>
+
+        <!-- Content -->
+        <div class="sidebar-section-title">Content</div>
+
+        <a href="{% url 'admin_dashboard:post_list' %}"
+          class="nav-item {% if active_nav == 'posts' %}active{% endif %}">
+          <span class="nav-icon">🖼️</span>
+          <span class="sidebar-label">Posts</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:story_list' %}"
+          class="nav-item {% if active_nav == 'stories' %}active{% endif %}">
+          <span class="nav-icon">📸</span>
+          <span class="sidebar-label">Stories</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:reel_list' %}"
+          class="nav-item {% if active_nav == 'reels' %}active{% endif %}">
+          <span class="nav-icon">🎬</span>
+          <span class="sidebar-label">Reels</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:comment_list' %}"
+          class="nav-item {% if active_nav == 'comments' %}active{% endif %}">
+          <span class="nav-icon">💬</span>
+          <span class="sidebar-label">Comments</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:hashtag_list' %}"
+          class="nav-item {% if active_nav == 'hashtags' %}active{% endif %}">
+          <span class="nav-icon">#️⃣</span>
+          <span class="sidebar-label">Hashtags</span>
+        </a>
+
+        <!-- Moderation -->
+        <div class="sidebar-section-title">Moderation</div>
+
+        <a href="{% url 'admin_dashboard:report_list' %}"
+          class="nav-item {% if active_nav == 'reports' %}active{% endif %}">
+          <span class="nav-icon">🚩</span>
+          <span class="sidebar-label">Reports</span>
+          {% if pending_reports > 0 %}
+          <span class="nav-badge">{{ pending_reports }}</span>
+          {% endif %}
+        </a>
+
+        <!-- Communicate -->
+        <div class="sidebar-section-title">Communicate</div>
+
+        <a href="{% url 'admin_dashboard:messages_list' %}"
+          class="nav-item {% if active_nav == 'messages' %}active{% endif %}">
+          <span class="nav-icon">✉️</span>
+          <span class="sidebar-label">Messages</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:notifications_send' %}"
+          class="nav-item {% if active_nav == 'notifications' %}active{% endif %}">
+          <span class="nav-icon">🔔</span>
+          <span class="sidebar-label">Notifications</span>
+        </a>
+
+        <!-- System -->
+        <div class="sidebar-section-title">System</div>
+
+        <a href="{% url 'admin_dashboard:activity_logs' %}"
+          class="nav-item {% if active_nav == 'logs' %}active{% endif %}">
+          <span class="nav-icon">📋</span>
+          <span class="sidebar-label">Activity Logs</span>
+        </a>
+
+        <a href="{% url 'admin_dashboard:site_settings' %}"
+          class="nav-item {% if active_nav == 'settings' %}active{% endif %}">
+          <span class="nav-icon">⚙️</span>
+          <span class="sidebar-label">Settings</span>
+        </a>
+
+      </div><!-- end sidebar-nav -->
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <a href="{% url 'admin_dashboard:logout' %}" class="nav-item"
+          onclick="return confirm('Log out of admin dashboard?')">
+          <span class="nav-icon">🚪</span>
+          <span class="sidebar-label">Logout</span>
+        </a>
+      </div>
+
+    </nav><!-- end sidebar -->
+
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay" class="modal-overlay" style="z-index:99; background:rgba(0,0,0,0.6);"
+      onclick="Sidebar.closeMobile()"></div>
+
+    <!-- ─── Main Content ───────────────────────────────────────────── -->
+    <div class="main-content" id="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar" role="banner">
+        <button class="topbar-toggle" id="sidebar-toggle" title="Toggle Sidebar" aria-label="Toggle Sidebar">☰</button>
+
+        <!-- Global search -->
+        <form class="topbar-search" action="{% url 'admin_dashboard:global_search' %}" method="GET" role="search">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="q" placeholder="Search users, posts, hashtags..." value="{{ request.GET.q }}"
+            autocomplete="off" aria-label="Global search">
+        </form>
+
+        <div class="topbar-actions">
+          <!-- Theme toggle -->
+          <button class="topbar-btn" id="theme-toggle" title="Toggle Dark/Light Mode"
+            aria-label="Toggle theme">☀️</button>
+
+          <!-- Reports alert -->
+          {% if pending_reports > 0 %}
+          <a href="{% url 'admin_dashboard:report_list' %}" class="topbar-btn"
+            title="{{ pending_reports }} pending reports">
+            🚩
+            <span class="topbar-btn-badge"></span>
+          </a>
+          {% endif %}
+
+          <!-- Admin user info -->
+          <div class="topbar-user" role="button" tabindex="0">
+            <div class="topbar-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="topbar-user-info">
+              <div class="topbar-user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+              <div class="topbar-user-role">{{ admin_role|default:"Admin"|title }}</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content" role="main">
+        {% block content %}{% endblock %}
+      </main>
+
+    </div><!-- end main-content -->
+
+  </div><!-- end admin-layout -->
+
+  <!-- Toast Container -->
+  <div class="toast-container" role="log" aria-live="polite"></div>
+
+  <!-- Admin JS -->
+  <script src="{% static 'admin_dashboard/js/admin.js' %}"></script>
+  <script src="{% static 'admin_dashboard/js/charts.js' %}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

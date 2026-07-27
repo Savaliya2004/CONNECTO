@@ -1,0 +1,123 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Verification Requests{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Verification</span></div>
+    <h1 class="page-title">Verification Requests</h1>
+    <p class="page-subtitle">{{ total_pending }} blue badge requests require review</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:verification_list' %}">
+    <div class="filter-bar">
+      <select name="status" class="admin-select" style="max-width: 180px;">
+        <option value="">All Statuses</option>
+        {% for code, label in status_choices %}
+        <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:verification_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Reason</th>
+          <th>Verification Document</th>
+          <th>Status</th>
+          <th>Requested Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in verifications %}
+        <tr>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' request.user.id %}" class="user-cell">
+              <div class="user-avatar" style="width:28px;height:28px;font-size:11px;">{{ request.user.username|first|upper }}</div>
+              <span class="user-name" style="font-size:13px;">@{{ request.user.username }}</span>
+            </a>
+          </td>
+          <td class="text-sm" style="max-width:250px; word-wrap: break-word; white-space: normal;">{{ request.reason }}</td>
+          <td>
+            {% if request.document %}
+              <a href="{{ request.document.url }}" target="_blank" class="badge badge-accent">📄 View Document</a>
+            {% else %}
+              <span class="text-muted">No document uploaded</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if request.status == 'pending' %}<span class="badge badge-warning">Pending</span>
+            {% elif request.status == 'approved' %}<span class="badge badge-success">Approved</span>
+            {% elif request.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% else %}<span class="badge badge-muted">More Info Requested</span>{% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ request.created_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-xs" onclick="Modal.open('verif-modal-{{ request.id }}')">Process</button>
+            </div>
+            
+            <!-- Action Modal -->
+            <div class="modal-overlay" id="verif-modal-{{ request.id }}">
+              <div class="modal">
+                <div class="modal-header">
+                  <span class="modal-title">Verification Request: @{{ request.user.username }}</span>
+                  <button class="modal-close" onclick="Modal.close('verif-modal-{{ request.id }}')">×</button>
+                </div>
+                <div class="modal-body">
+                  <p class="mb-4"><strong>User:</strong> @{{ request.user.username }}</p>
+                  <p class="mb-4"><strong>Reason:</strong> {{ request.reason }}</p>
+                  
+                  <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+                  
+                  <form method="POST" action="{% url 'admin_dashboard:verification_action' request.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label class="form-label">Action</label>
+                      {{ action_form.action }}
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Notes (Sent to user)</label>
+                      {{ action_form.admin_notes }}
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                      <button type="button" class="btn btn-ghost btn-sm" onclick="Modal.close('verif-modal-{{ request.id }}')">Cancel</button>
+                      <button type="submit" class="btn btn-primary btn-sm">Submit Decision</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-msg">No verification requests found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if verifications.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">Page {{ verifications.number }} of {{ verifications.paginator.num_pages }}</span>
+    <div class="pagination">
+      {% if verifications.has_previous %}<a href="?page={{ verifications.previous_page_number }}&status={{ filters.status }}" class="page-link">‹</a>{% endif %}
+      {% for num in verifications.paginator.page_range %}
+        {% if verifications.number == num %}<span class="page-link active">{{ num }}</span>
+        {% elif num > verifications.number|add:'-3' and num < verifications.number|add:'3' %}<a href="?page={{ num }}&status={{ filters.status }}" class="page-link">{{ num }}</a>{% endif %}
+      {% endfor %}
+      {% if verifications.has_next %}<a href="?page={{ verifications.next_page_number }}&status={{ filters.status }}" class="page-link">›</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

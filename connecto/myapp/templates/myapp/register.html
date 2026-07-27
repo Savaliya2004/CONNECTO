@@ -1,21 +1,88 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account - Connecto</title>
     <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}?v=5">
     <link rel="stylesheet" href="{% static 'myapp/css/register.css' %}?v=5">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <style>
+        /* Dark Theme Overrides for Register Page */
+        [data-theme="dark"] .register-body {
+            background: linear-gradient(145deg, #0a0e0a 0%, #0d120d 50%, #121812 100%) !important;
+            color: var(--text-body) !important;
+        }
+
+        [data-theme="dark"] .register-card {
+            background: var(--bg-card) !important;
+            border-color: var(--border-color) !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        [data-theme="dark"] .register-logo {
+            color: var(--text-primary) !important;
+            -webkit-text-fill-color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .register-subtitle {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .register-label {
+            color: var(--text-body) !important;
+        }
+
+        [data-theme="dark"] .register-input {
+            background: var(--bg-main) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .register-input::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .register-gender-container {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .register-link {
+            color: var(--accent-secondary) !important;
+        }
+
+        [data-theme="dark"] .register-footer {
+            color: var(--text-muted) !important;
+        }
+    </style>
 </head>
+
 <body class="register-body">
+    <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode"
+        style="position: fixed; top: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; box-shadow: var(--shadow); z-index: 1000; transition: var(--transition);">
+        🌙
+    </button>
+
     <div class="register-card">
-        <h1 class="logo-text register-logo">Connecto</h1>
+        <div style="display:flex; justify-content:center; margin-bottom:16px;">
+            <a href="/" class="logo-text-new">
+                <!-- <span class="logo-icon-new">⚡</span> -->
+                <span class="logo-label-new">CONNECTO</span>
+            </a>
+        </div>
         <p class="subtitle register-subtitle">Join the elite community.</p>
 
         {% if e_msg %}
-            <div class="register-error">{{ e_msg }}</div>
+        <div class="register-error">{{ e_msg }}</div>
         {% endif %}
 
         <form method="post" action="{% url 'signup' %}" enctype="multipart/form-data">
@@ -35,13 +102,14 @@
                 </div>
                 <div>
                     <label class="register-label">Confirm</label>
-                    <input type="password" name="confirm_password" placeholder="••••••••" required class="register-input">
+                    <input type="password" name="confirm_password" placeholder="••••••••" required
+                        class="register-input">
                 </div>
                 <div class="register-form-full">
                     <label class="register-label">Gender</label>
                     <div class="register-gender-container">
-                         <input type="radio" name="gender" value="male" id="male" checked> Male
-                         <input type="radio" name="gender" value="female" id="female"> Female
+                        <input type="radio" name="gender" value="male" id="male" checked> Male
+                        <input type="radio" name="gender" value="female" id="female"> Female
                     </div>
                 </div>
             </div>
@@ -52,5 +120,28 @@
             Already a member? <a href="{% url 'login' %}" class="register-link">Sign In</a>
         </p>
     </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+    </script>
 </body>
+
 </html>

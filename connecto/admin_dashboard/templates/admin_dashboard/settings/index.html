@@ -1,0 +1,83 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Site Settings{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Settings</span></div>
+    <h1 class="page-title">Site Settings</h1>
+    <p class="page-subtitle">Configure application level constants and features</p>
+  </div>
+</div>
+
+<div class="charts-grid mb-6">
+  <!-- Config Form -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">⚙️ Update Configuration</span></div>
+    <div class="card-body">
+      {% if success %}
+      <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-sm); padding:12px; color:var(--success); font-size:13px; margin-bottom:20px;">
+        ✅ Settings updated successfully!
+      </div>
+      {% endif %}
+      
+      <form method="POST" action="{% url 'admin_dashboard:site_settings' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="id_site_name">Site Name</label>
+          {{ form.site_name }}
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+          {{ form.maintenance_mode }}
+          <label class="form-label" for="id_maintenance_mode" style="margin-bottom:0;">Enable Maintenance Mode</label>
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+          {{ form.allow_registration }}
+          <label class="form-label" for="id_allow_registration" style="margin-bottom:0;">Allow User Registrations</label>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_max_post_size">Max Post Size (MB)</label>
+          {{ form.max_post_size_mb }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_support_email">Support Email Address</label>
+          {{ form.support_email }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_pw_min_length">Password Min Length</label>
+          {{ form.password_min_length }}
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Save System Configuration 💾</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DB Settings Values -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">📋 Live Settings in DB</span></div>
+    <div class="card-body" style="padding: 0; max-height:480px; overflow-y:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Setting Key</th>
+            <th>Value</th>
+            <th>Last Updated By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for setting in all_settings %}
+          <tr>
+            <td class="text-sm font-semibold text-accent">{{ setting.key }}</td>
+            <td class="text-sm">{{ setting.value }}</td>
+            <td class="text-muted text-xs">{{ setting.updated_by.username|default:"System" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-muted text-sm text-center">No settings stored in DB yet. Using defaults.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span><span>Users</span>
+    </div>
+    <h1 class="page-title">User Management</h1>
+    <p class="page-subtitle">{{ total_users }} total users registered</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'admin_dashboard:export_csv' 'users' %}" class="btn btn-ghost btn-sm">⬇️ Export CSV</a>
+  </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:user_list' %}" id="user-filter-form">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input"
+               placeholder="Search username, email, name..." value="{{ filters.q }}">
+      </div>
+      <input type="date" name="date_from" class="admin-input" value="{{ filters.date_from }}"
+             title="Joined from" style="max-width: 160px;">
+      <input type="date" name="date_to" class="admin-input" value="{{ filters.date_to }}"
+             title="Joined to" style="max-width: 160px;">
+      <select name="sort" class="admin-select" style="max-width: 180px;">
+        <option value="-created_at" {% if filters.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+        <option value="created_at" {% if filters.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+        <option value="username" {% if filters.sort == 'username' %}selected{% endif %}>Username A–Z</option>
+        <option value="-follower_count" {% if filters.sort == '-follower_count' %}selected{% endif %}>Most Followers</option>
+        <option value="-post_count" {% if filters.sort == '-post_count' %}selected{% endif %}>Most Posts</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{% url 'admin_dashboard:user_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+  <div class="table-wrapper" style="border: none; border-radius: 0;">
+    <table class="admin-table" id="users-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="select-all" class="admin-checkbox"></th>
+          <th class="sortable" data-sort="username">User ↕</th>
+          <th>Email</th>
+          <th class="sortable" data-sort="created_at">Joined ↕</th>
+          <th class="sortable" data-sort="-follower_count">Followers ↕</th>
+          <th>Following</th>
+          <th class="sortable" data-sort="-post_count">Posts ↕</th>
+          <th>Stories</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td><input type="checkbox" class="row-checkbox admin-checkbox" value="{{ user.id }}"></td>
+          <td>
+            <a href="{% url 'admin_dashboard:user_detail' user.id %}" class="user-cell">
+              <div class="user-avatar">
+                {% if user.profile_pic %}
+                  <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}">
+                {% else %}
+                  {{ user.username|first|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="user-name">@{{ user.username }}</div>
+                <div class="user-sub">{{ user.name|default:"—" }}</div>
+              </div>
+            </a>
+          </td>
+          <td class="text-muted text-sm">{{ user.email }}</td>
+          <td class="text-muted text-sm">{{ user.created_at|date:"M d, Y" }}</td>
+          <td><span class="badge badge-accent">{{ user.follower_count }}</span></td>
+          <td class="text-muted">{{ user.following_count }}</td>
+          <td class="text-muted">{{ user.post_count }}</td>
+          <td class="text-muted">{{ user.story_count }}</td>
+          <td>
+            {% with suspension=user.suspensions.filter %}
+            <span class="badge badge-success">Active</span>
+            {% endwith %}
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a href="{% url 'admin_dashboard:user_detail' user.id %}" class="btn btn-ghost btn-xs" title="View Profile">👁</a>
+              <a href="{% url 'admin_dashboard:user_edit' user.id %}" class="btn btn-ghost btn-xs" title="Edit User">✏️</a>
+              <!-- Quick action form -->
+              <div class="action-menu">
+                <button class="btn btn-ghost btn-xs" data-dropdown-toggle title="More Actions">⋮</button>
+                <div class="action-dropdown">
+                  <a href="{% url 'admin_dashboard:user_detail' user.id %}">👁 View Profile</a>
+                  <a href="{% url 'admin_dashboard:user_edit' user.id %}">✏️ Edit User</a>
+                  <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="suspend-{{ user.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="suspend">
+                    <input type="hidden" name="reason" value="Admin action">
+                    <button type="button" onclick="confirmAction('Suspend @{{ user.username }}?', 'suspend-{{ user.id }}')">⏸ Suspend</button>
+                  </form>
+                  <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="ban-{{ user.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ban">
+                    <input type="hidden" name="reason" value="Admin action">
+                    <button type="button" class="danger" onclick="confirmAction('Ban @{{ user.username }}? This is permanent.', 'ban-{{ user.id }}')">🚫 Ban</button>
+                  </form>
+                  <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="verify-{{ user.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="verify">
+                    <button type="submit">✅ Verify Account</button>
+                  </form>
+                  <form method="POST" action="{% url 'admin_dashboard:user_action' user.id %}" id="delete-{{ user.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="reason" value="">
+                    <button type="button" class="danger" onclick="confirmDelete('Permanently delete @{{ user.username }} and ALL their data?', 'delete-{{ user.id }}')">🗑 Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10">
+            <div class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <div class="empty-state-title">No users found</div>
+              <div class="empty-state-msg">Try adjusting your search filters</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if users.has_other_pages %}
+  <div class="card-footer">
+    <span class="text-muted text-sm">
+      Page {{ users.number }} of {{ users.paginator.num_pages }}
+      ({{ users.paginator.count }} users)
+    </span>
+    <div class="pagination">
+      {% if users.has_previous %}
+        <a href="?page={{ users.previous_page_number }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">‹</a>
+      {% endif %}
+      {% for num in users.paginator.page_range %}
+        {% if users.number == num %}
+          <span class="page-link active">{{ num }}</span>
+        {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+          <a href="?page={{ num }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if users.has_next %}
+        <a href="?page={{ users.next_page_number }}&q={{ filters.q }}&sort={{ filters.sort }}" class="page-link">›</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

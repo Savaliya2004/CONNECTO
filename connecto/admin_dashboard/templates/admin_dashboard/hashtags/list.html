@@ -1,0 +1,54 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Hashtag Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="{% url 'admin_dashboard:dashboard' %}">Dashboard</a><span class="breadcrumb-sep">/</span><span>Hashtags</span></div>
+    <h1 class="page-title">Hashtag Management</h1>
+    <p class="page-subtitle">Track and moderate trending hashtags on the platform</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <form method="GET" action="{% url 'admin_dashboard:hashtag_list' %}">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" id="live-search-input" class="admin-input" placeholder="Search hashtag..." value="{{ filters.q }}">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Search</button>
+      <a href="{% url 'admin_dashboard:hashtag_list' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="max-width: 600px;">
+  <div class="table-wrapper" style="border:none;border-radius:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Hashtag</th>
+          <th>Usage Count</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in hashtags %}
+        <tr>
+          <td>
+            <span class="tag-pill">#{{ item.tag }}</span>
+          </td>
+          <td><span class="badge badge-accent">{{ item.count }} posts</span></td>
+          <td>
+            <a href="{% url 'admin_dashboard:post_list' %}?q=%23{{ item.tag }}" class="btn btn-ghost btn-xs">View Posts</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3"><div class="empty-state"><div class="empty-state-icon">#</div><div class="empty-state-msg">No hashtags found</div></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
