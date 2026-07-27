@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'myapp/css/profile.css' %}?v=12">
+<link rel="stylesheet" href="{% static 'myapp/css/following.css' %}?v=11">
 <style>
     .explore-grid {
         display: grid;
@@ -62,16 +63,48 @@
 {% block content %}
 <div class="feed-section" style="max-width: 1000px;">
     <h2 class="page-title" style="margin-bottom: 2rem; font-family: 'Playfair Display', serif;">Explore</h2>
-    <div class="search-section" style="margin-bottom: 2rem;">
+    <div class="search-section" style="margin-bottom: 2rem; padding: 0;">
         <div class="search-bar" style="position: relative; display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 0 1rem;">
             <span class="material-icons" style="font-size: 1.2rem; color: var(--text-muted);">search</span>
             <input type="text" id="exploreSearch" placeholder="Search explore..." style="width: 100%; padding: 0.8rem 0.5rem; background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.95rem; font-family: 'DM Sans', sans-serif;">
         </div>
     </div>
 
+    <!-- Accounts Search Results List -->
+    <div class="user-list" id="userSearchResults" style="display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; margin-bottom: 2rem; box-shadow: var(--shadow); padding: 1rem 0;">
+        <div style="padding: 0 1.5rem 0.5rem; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">Accounts</div>
+        {% for u in users %}
+        <div class="user-card explore-user-card" data-username="{{ u.username|lower }}" data-name="{{ u.name|default:''|lower }}" data-user-id="{{ u.id }}" style="display: none;">
+            <div class="user-info">
+                <div class="user-avatar" style="width: 44px; height: 44px;">
+                    {% if u.profile_pic %}
+                    <img src="{{ u.profile_pic.url }}" alt="{{ u.username }}">
+                    {% else %}
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #ccc;"></div>
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <span class="username">{{ u.username }}</span>
+                    <span class="full-name">{{ u.name|default:'' }}</span>
+                </div>
+            </div>
+            <div class="user-actions">
+                {% if u.id in my_following %}
+                <a href="{% url 'follow_unfollow' pk=u.id %}" class="btn-pill btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Unfollow</a>
+                {% else %}
+                <a href="{% url 'follow_unfollow' pk=u.id %}" class="btn-pill btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Follow</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <div id="noUserResults" style="display: none; text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+            No accounts found matching your query
+        </div>
+    </div>
+
     <div class="explore-grid animate-fade-in" id="exploreGrid">
         {% for i in post_all %}
-        <a href="{% url 'profile' %}" class="explore-item" data-caption="{{ i.caption|default:'' }}">
+        <a href="{% url 'profile' %}" class="explore-item" data-caption="{{ i.caption|default:'' }}" data-username="{{ i.user.username|default:'' }}" data-user-id="{{ i.user.id|default:'' }}">
             <img src="{{i.image.url}}" alt="Explore Post">
             <div class="explore-overlay">
                 <div class="overlay-stat"><span class="material-icons">favorite</span> {{ i.liked_post.count }}</div>
@@ -81,7 +114,7 @@
         {% endfor %}
 
         {% for i in reels_all %}
-        <a href="{% url 'reels' %}" class="explore-item is-reel" data-caption="{{ i.caption|default:'' }}">
+        <a href="{% url 'reels' %}" class="explore-item is-reel" data-caption="{{ i.caption|default:'' }}" data-username="{{ i.user.username|default:'' }}" data-user-id="{{ i.user.id|default:'' }}">
             <span class="material-icons reel-indicator">smart_display</span>
             <video src="{{i.video.url}}" muted loop onmouseover="this.play()" onmouseout="this.pause()" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"></video>
             <div class="explore-overlay">
@@ -102,18 +135,60 @@
     <script>
         const searchInput = document.getElementById('exploreSearch');
         const gridItems = document.querySelectorAll('.explore-item');
+        const userSearchResults = document.getElementById('userSearchResults');
+        const exploreUserCards = document.querySelectorAll('.explore-user-card');
+        const noUserResults = document.getElementById('noUserResults');
         
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                gridItems.forEach(item => {
-                    const caption = item.getAttribute('data-caption').toLowerCase();
-                    if (caption.includes(query)) {
-                        item.style.display = 'block';
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (query.length > 0) {
+                    // Show user search results list
+                    userSearchResults.style.display = 'block';
+                    let foundUsers = 0;
+                    
+                    exploreUserCards.forEach(card => {
+                        const username = card.getAttribute('data-username') || '';
+                        const name = card.getAttribute('data-name') || '';
+                        const userId = card.getAttribute('data-user-id') || '';
+                        
+                        if (username.includes(query) || name.includes(query) || userId === query) {
+                            card.style.display = 'flex';
+                            foundUsers++;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    if (foundUsers === 0) {
+                        noUserResults.style.display = 'block';
                     } else {
-                        item.style.display = 'none';
+                        noUserResults.style.display = 'none';
                     }
-                });
+                    
+                    // Filter posts/reels in grid
+                    gridItems.forEach(item => {
+                        const caption = (item.getAttribute('data-caption') || '').toLowerCase();
+                        const username = (item.getAttribute('data-username') || '').toLowerCase();
+                        const userId = (item.getAttribute('data-user-id') || '').toLowerCase();
+                        
+                        if (caption.includes(query) || username.includes(query) || userId === query) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                } else {
+                    // Hide user results list and restore normal grid view
+                    userSearchResults.style.display = 'none';
+                    exploreUserCards.forEach(card => card.style.display = 'none');
+                    noUserResults.style.display = 'none';
+                    
+                    gridItems.forEach(item => {
+                        item.style.display = 'block';
+                    });
+                }
             });
         }
     </script>

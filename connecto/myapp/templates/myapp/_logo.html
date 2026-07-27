@@ -1,0 +1,12 @@
+{% load static %}{# Reusable CONNECTO logo component.
+Usage: {% include 'myapp/_logo.html' with size="lg" href="/" %}
+size: "lg" (80px – auth cards) | "sm" (36px – sidebar) | "" (42px – default navbar)
+href: link target, defaults to "/"
+#}
+{% with href=href|default:"/" %}
+<a href="{{ href }}" class="connecto-logo-link{% if size %} connecto-logo-link--{{ size }}{% endif %}"
+   aria-label="CONNECTO – Go to home">
+   <img src="{% static 'images/logo/connecto-logo.png' %}" alt="CONNECTO"
+      class="connecto-logo{% if size %} connecto-logo--{{ size }}{% endif %}" draggable="false">
+</a>
+{% endwith %}

@@ -232,21 +232,21 @@ def following(request):
     uid = request.uid
     users = InstaUser.objects.exclude(username = uid.username)
 
-    # my_following =Follow.objects.filter(following = uid).values_list('following_person_id',flat=True)
-    my_following = Follow.objects.filter(following = uid)
-    context = {
-        'users' : users,
-        'my_following' : my_following,
-    }
+    my_following_qs = Follow.objects.filter(following = uid)
 
     query = request.GET.get("q")
 
     if query:
-        my_following = my_following.filter(
+        my_following_qs = my_following_qs.filter(
             Q(following_person__username__icontains = query) |
             Q(following_person__name__icontains = query)
-
         )
+    
+    my_following = list(my_following_qs.values_list('following_person_id', flat=True))
+    context = {
+        'users' : users,
+        'my_following' : my_following,
+    }
     return render(request,"myapp/following.html",context)
 
 @checkLoggin
@@ -306,11 +306,16 @@ def remove_followers(request,pk):
 def explore(request):
     uid = request.uid
     liked_posts = Like_Unlike.objects.filter(user_fk=uid).values_list('post_fk_id', flat=True)
+    users = InstaUser.objects.exclude(username = uid.username)
+    my_following = list(Follow.objects.filter(following = uid).values_list('following_person_id', flat=True))
+    
     context = {
         'uid': uid,
         'post_all': InstaPost.objects.all(),
         'reels_all': InstaReels.objects.all(),
         'liked_posts': liked_posts,
+        'users': users,
+        'my_following': my_following,
     }
     return render(request, "myapp/explore.html", context)
 

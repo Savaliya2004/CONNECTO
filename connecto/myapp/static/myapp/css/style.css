@@ -12,16 +12,19 @@
     --bg-card: #FFFFFF;
     --bg-sidebar: #FFFFFF;
     --border-color: #E8E0D4;
-    
+
     --text-primary: #1E1E1E;
     --text-body: #3D3529;
     --text-muted: #8A7E70;
     --text-light: #B0A696;
-    
-    --accent-primary: #2D4A2E;  /* Olive in Light */
-    --accent-secondary: #C4A265; /* Gold in Light */
-    --accent-hover: #F0F5F0;     /* Faint Olive */
-    
+
+    --accent-primary: #2D4A2E;
+    /* Olive in Light */
+    --accent-secondary: #C4A265;
+    /* Gold in Light */
+    --accent-hover: #F0F5F0;
+    /* Faint Olive */
+
     --shadow: 0 4px 16px rgba(44, 36, 24, 0.08);
     --radius: 16px;
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -29,25 +32,37 @@
 
 [data-theme="dark"] {
     /* DEEP FOREST & OLIVE (Dark Green Aesthetic) */
-    --bg-main: #0a0e0a;          /* Charcoal-Green */
-    --bg-card: #121812;          /* Deep Olive-Black */
-    --bg-sidebar: #0d120d;       /* Darkest Forest */
-    --border-color: #1e281e;     /* Deep Sage Borders */
-    
-    --text-primary: #e8f0e8;      /* Sage Tinted White */
-    --text-body: #b8c8b8;         /* Soft Sage */
-    --text-muted: #6a7a6a;        /* Muted Forest */
+    --bg-main: #0a0e0a;
+    /* Charcoal-Green */
+    --bg-card: #121812;
+    /* Deep Olive-Black */
+    --bg-sidebar: #0d120d;
+    /* Darkest Forest */
+    --border-color: #1e281e;
+    /* Deep Sage Borders */
+
+    --text-primary: #e8f0e8;
+    /* Sage Tinted White */
+    --text-body: #b8c8b8;
+    /* Soft Sage */
+    --text-muted: #6a7a6a;
+    /* Muted Forest */
     --text-light: #3a4a3a;
-    
-    --accent-primary: #4a6a4a;    /* Vibrant Forest Green */
-    --accent-secondary: #8aa88a;  /* Pale Sage */
-    --accent-hover: #1a251a;      /* Leaf Tint */
-    
+
+    --accent-primary: #4a6a4a;
+    /* Vibrant Forest Green */
+    --accent-secondary: #8aa88a;
+    /* Pale Sage */
+    --accent-hover: #1a251a;
+    /* Leaf Tint */
+
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -62,7 +77,12 @@ body {
     transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: 'Playfair Display', Georgia, serif;
     color: var(--text-primary);
     font-weight: 600;
@@ -81,8 +101,14 @@ img {
 }
 
 /* ========== SCROLLBAR ========== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-main);
+}
+
 ::-webkit-scrollbar-thumb {
     background: var(--text-light);
     border-radius: 10px;
@@ -478,8 +504,13 @@ img {
 }
 
 /* ========== UTILITIES ========== */
-.text-accent { color: var(--accent-primary) !important; }
-.bg-card { background: var(--bg-card) !important; }
+.text-accent {
+    color: var(--accent-primary) !important;
+}
+
+.bg-card {
+    background: var(--bg-card) !important;
+}
 
 /* Material icons default color */
 .material-icons {
@@ -489,8 +520,13 @@ img {
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
-    .sidebar { display: none !important; }
-    .main-content { padding: 1rem; }
+    .sidebar {
+        display: none !important;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
 }
 
 /* ========== WIDGETS (Sidebar) ========== */
@@ -502,7 +538,9 @@ img {
 }
 
 @media (min-width: 1200px) {
-    .widgets-section { display: block; }
+    .widgets-section {
+        display: block;
+    }
 }
 
 .user-mini-card {
